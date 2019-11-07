@@ -17,9 +17,7 @@ KUBERNETES_TEMPLATES:
 DOMAIN_NAMES:
 - www.example.com
 
-ENV_NAME: dev
-
-NAMESPACE: "echoserver-{{ ENV_NAME }}"
+NAMESPACE: "echoserver"
 
 MEMCACHED_VERSION: "1.5.19"
 
