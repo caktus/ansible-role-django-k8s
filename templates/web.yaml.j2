@@ -7,7 +7,7 @@ metadata:
     app: "{{ container["name"] }}"
   namespace: "{{ NAMESPACE }}"
 type: Opaque
-stringData: {{ container["environment"] }}
+stringData: {{ container["environment"] | to_yaml }}
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -6,7 +6,7 @@ metadata:
     app: "celery"
   namespace: "{{ NAMESPACE }}"
 type: Opaque
-stringData: {{ WORKER_CONTAINER["environment"] }}
+stringData: {{ WORKER_CONTAINER["environment"] | to_yaml }}
 ---
 apiVersion: apps/v1
 kind: Deployment
