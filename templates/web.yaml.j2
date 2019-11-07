@@ -1,0 +1,86 @@
+{% for container in WEB_CONTAINERS %}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "{{ container["name"] }}-secrets"
+  labels:
+    app: "{{ container["name"] }}"
+  namespace: "{{ NAMESPACE }}"
+type: Opaque
+stringData: {{ container["environment"] }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ container["name"] }}"
+  namespace: "{{ NAMESPACE }}"
+spec:
+  selector:
+    matchLabels:
+      app: "{{ container["name"] }}"
+  replicas: {{ container["replicas"] }}
+  template:
+    metadata:
+      labels:
+        app: "{{ container["name"] }}"
+    spec:
+      containers:
+      - name: "{{ container["name"] }}"
+        image: "{{ container["image"] }}:{{ container["tag"] }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        envFrom:
+        - secretRef:
+            name: "{{ container["name"] }}-secrets"
+        ports:
+        - containerPort: {{ container["port"] }}
+      securityContext: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "{{ container["name"] }}"
+  labels:
+    app: "{{ container["name"] }}"
+  namespace: "{{ NAMESPACE }}"
+spec:
+  ports:
+  - protocol: TCP
+    # Where other things in the cluster should try to connect to our application
+    port: {{ container["port"] }}
+    # Where our application is listening:
+    targetPort: {{ container["port"] }}
+  selector:
+    app: "{{ container["name"] }}"
+---
+{% endfor %}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "ingress"
+  namespace: "{{ NAMESPACE }}"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    certmanager.k8s.io/cluster-issuer: "letsencrypt-production"
+    nginx.ingress.kubernetes.io/backend-protocol: "{{ WEB_PROTOCOL }}"
+spec:
+  tls:
+  - hosts:
+{% for domain in DOMAIN_NAMES %}
+    - "{{ domain }}"
+{% endfor %}
+    secretName: "{{ NAMESPACE }}-tls"
+  rules:
+{% for domain in DOMAIN_NAMES %}
+  - host: "{{ domain }}"
+    http:
+      paths:
+{% for container in WEB_CONTAINERS %}
+      - path: "{{ container["ingress_path"] }}"
+        backend:
+          serviceName: "{{ container["name"] }}"
+          servicePort: {{ container["port"] }}
+{% endfor %}
+{% endfor %}

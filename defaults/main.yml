@@ -1,0 +1,50 @@
+---
+KUBE_CONFIG: "~/.kube/config"
+KUBE_CONTEXT: ""
+
+KUBERNETES_TEMPLATES:
+- name: namespace.yaml.j2
+  state: present
+- name: redis.yaml.j2
+  state: present
+- name: memcached.yaml.j2
+  state: present
+- name: web.yaml.j2
+  state: present
+- name: workers.yaml.j2
+  state: absent
+
+DOMAIN_NAMES:
+- www.example.com
+
+ENV_NAME: dev
+
+NAMESPACE: "echoserver-{{ ENV_NAME }}"
+
+MEMCACHED_VERSION: "1.5.19"
+
+REDIS_VERSION: "5.0.6"
+REDIS_VOLUME_SIZE: "20Gi"
+
+CONTAINER_IMAGE: k8s.gcr.io/echoserver
+CONTAINER_IMAGE_TAG: "1.10"
+CONTAINER_PORT: 8080
+
+ENVIRONMENT_VARIABLES: {}
+
+WEB_PROTOCOL: http  # Must be the same for all containers
+WEB_CONTAINERS:
+- name: web
+  image: "{{ CONTAINER_IMAGE }}"
+  tag: "{{ CONTAINER_IMAGE_TAG }}"
+  replicas: 2
+  port: "{{ CONTAINER_PORT }}"
+  ingress_path: /
+  environment: "{{ ENVIRONMENT_VARIABLES }}"
+
+WORKER_CONTAINER:
+  image: "{{ CONTAINER_IMAGE }}"
+  tag: "{{ CONTAINER_IMAGE_TAG }}"
+  replicas: 2
+  celery_app: ""
+  environment: "{{ ENVIRONMENT_VARIABLES }}"

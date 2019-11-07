@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "memcached"
+  namespace: "{{ NAMESPACE }}"
+spec:
+  selector:
+    matchLabels:
+      app: "memcached"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "memcached"
+    spec:
+      containers:
+      - name: "memcached"
+        image: "memcached:{{ MEMCACHED_VERSION }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        ports:
+        - containerPort: 11211
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "memcached"
+  labels:
+    app: "memcached"
+  namespace: "{{ NAMESPACE }}"
+spec:
+  ports:
+  - protocol: TCP
+    # Where other things in the cluster should try to connect to our application
+    port: 11211
+    # Where our application is listening:
+    targetPort: 11211
+  selector:
+    app: "memcached"

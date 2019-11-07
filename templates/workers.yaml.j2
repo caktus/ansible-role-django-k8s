@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "celery-secrets"
+  labels:
+    app: "celery"
+  namespace: "{{ NAMESPACE }}"
+type: Opaque
+stringData: {{ WORKER_CONTAINER["environment"] }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "celery-worker"
+  namespace: "{{ NAMESPACE }}"
+spec:
+  selector:
+    matchLabels:
+      app: "celery-worker"
+  replicas: {{ WORKER_CONTAINER["replicas"] }}
+  template:
+    metadata:
+      labels:
+        app: "celery-worker"
+    spec:
+      containers:
+      - name: "celery-worker"
+        image: "{{ WORKER_CONTAINER["image"] }}:{{ WORKER_CONTAINER["tag"] }}"
+        imagePullPolicy: IfNotPresent
+        args: ["celery", "--app={{ WORKER_CONTAINER["celery_app"] }}", "worker", "--workdir=/code", "--loglevel=info"]
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        - name: PYTHONPATH
+          value: "."
+        envFrom:
+        - secretRef:
+            name: "celery-secrets"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: beatvolume-claim
+  namespace: "{{ NAMESPACE }}"
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "celery-beat"
+  namespace: "{{ NAMESPACE }}"
+spec:
+  selector:
+    matchLabels:
+      app: "celery-beat"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "celery-beat"
+    spec:
+      containers:
+      - name: "celery-beat"
+        image: "{{ WORKER_CONTAINER["image"] }}:{{ WORKER_CONTAINER["tag"] }}"
+        imagePullPolicy: IfNotPresent
+        args: ["celery", "--app={{ WORKER_CONTAINER["celery_app"] }}", "beat", "--workdir=/code", "--loglevel=info", "--pidfile=/data/beat.pid", "--schedule=/data/schedulefile.db"]
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        - name: PYTHONPATH
+          value: .
+        envFrom:
+        - secretRef:
+            name: "celery-secrets"
+        volumeMounts:
+          - mountPath: /data
+            name: beatvolume
+      volumes:
+        - name: beatvolume
+          persistentVolumeClaim:
+            claimName: beatvolume-claim

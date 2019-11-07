@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redisvolume-claim
+  namespace: "{{ NAMESPACE }}"
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ REDIS_VOLUME_SIZE }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "redis"
+  namespace: "{{ NAMESPACE }}"
+spec:
+  selector:
+    matchLabels:
+      app: "redis"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "redis"
+    spec:
+      containers:
+      - name: "redis"
+        image: "redis:{{ REDIS_VERSION }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        ports:
+        - containerPort: 6379
+        volumeMounts:
+          - mountPath: /data
+            name: redisvolume
+      volumes:
+        - name: redisvolume
+          persistentVolumeClaim:
+            claimName: redisvolume-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "redis"
+  labels:
+    app: "redis"
+  namespace: "{{ NAMESPACE }}"
+spec:
+  ports:
+  - protocol: TCP
+    # Where other things in the cluster should try to connect to our application
+    port: 6379
+    # Where our application is listening:
+    targetPort: 6379
+  selector:
+    app: "redis"
