@@ -46,11 +46,11 @@ k8s_worker_container:
 k8s_templates:
 - name: namespace.yaml.j2
   state: present
-- name: web.yaml.j2
-  state: present
 - name: redis.yaml.j2
   state: "{{ k8s_redis_enabled | ternary('present', 'absent') }}"
 - name: memcached.yaml.j2
   state: "{{ k8s_memcached_enabled | ternary('present', 'absent') }}"
+- name: web.yaml.j2
+  state: present
 - name: workers.yaml.j2
   state: "{{ k8s_worker_enabled | ternary('present', 'absent') }}"
