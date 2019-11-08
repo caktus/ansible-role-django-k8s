@@ -2,19 +2,19 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: redisvolume-claim
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   accessModes:
   - ReadWriteOnce
   resources:
     requests:
-      storage: {{ REDIS_VOLUME_SIZE }}
+      storage: {{ k8s_redis_volume_size }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "redis"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   selector:
     matchLabels:
@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: "redis"
-        image: "redis:{{ REDIS_VERSION }}"
+        image: "redis:{{ k8s_redis_version }}"
         imagePullPolicy: IfNotPresent
         env:
         - name: GET_HOSTS_FROM
@@ -48,7 +48,7 @@ metadata:
   name: "redis"
   labels:
     app: "redis"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   ports:
   - protocol: TCP

@@ -1,8 +1,8 @@
 ---
 - name: Create/update resources in Kubernetes
   k8s:
-    context: "{{ KUBE_CONTEXT }}"
-    kubeconfig: "{{ KUBE_CONFIG }}"
+    context: "{{ k8s_kube_context }}"
+    kubeconfig: "{{ k8s_kube_config }}"
     definition: "{{ lookup('template', item['name']) }}"
     state: "{{ item['state'] }}"
     # Ensure we see any failures in CI
@@ -10,4 +10,4 @@
     validate:
       fail_on_error: yes
       strict: yes
-  with_items: "{{ KUBERNETES_TEMPLATES }}"
+  with_items: "{{ k8s_templates }}"

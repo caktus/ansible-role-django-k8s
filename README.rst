@@ -61,6 +61,6 @@ Installation
             ansible_connection: local
           hosts:
             gcp-staging:
-              KUBE_CONTEXT: <name of context from ~/.kube/config>
-              DOMAIN_NAMES:
+              k8s_kube_context: <name of context from ~/.kube/config>
+              k8s_domain_names:
               - www.example.com

@@ -1,11 +1,11 @@
-{% for container in WEB_CONTAINERS %}
+{% for container in k8s_web_containers %}
 apiVersion: v1
 kind: Secret
 metadata:
   name: "{{ container["name"] }}-secrets"
   labels:
     app: "{{ container["name"] }}"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 type: Opaque
 stringData: {{ container["environment"] | to_yaml }}
 ---
@@ -13,7 +13,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "{{ container["name"] }}"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   selector:
     matchLabels:
@@ -44,7 +44,7 @@ metadata:
   name: "{{ container["name"] }}"
   labels:
     app: "{{ container["name"] }}"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   ports:
   - protocol: TCP
@@ -60,24 +60,24 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: "ingress"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
   annotations:
     kubernetes.io/ingress.class: nginx
     certmanager.k8s.io/cluster-issuer: "letsencrypt-production"
-    nginx.ingress.kubernetes.io/backend-protocol: "{{ WEB_PROTOCOL }}"
+    nginx.ingress.kubernetes.io/backend-protocol: "{{ k8s_web_protocol }}"
 spec:
   tls:
   - hosts:
-{% for domain in DOMAIN_NAMES %}
+{% for domain in k8s_domain_names %}
     - "{{ domain }}"
 {% endfor %}
-    secretName: "{{ NAMESPACE }}-tls"
+    secretName: "{{ k8s_namespace }}-tls"
   rules:
-{% for domain in DOMAIN_NAMES %}
+{% for domain in k8s_domain_names %}
   - host: "{{ domain }}"
     http:
       paths:
-{% for container in WEB_CONTAINERS %}
+{% for container in k8s_web_containers %}
       - path: "{{ container["ingress_path"] }}"
         backend:
           serviceName: "{{ container["name"] }}"

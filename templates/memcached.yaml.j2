@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "memcached"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   selector:
     matchLabels:
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: "memcached"
-        image: "memcached:{{ MEMCACHED_VERSION }}"
+        image: "memcached:{{ k8s_memcached_version }}"
         imagePullPolicy: IfNotPresent
         env:
         - name: GET_HOSTS_FROM
@@ -29,7 +29,7 @@ metadata:
   name: "memcached"
   labels:
     app: "memcached"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   ports:
   - protocol: TCP

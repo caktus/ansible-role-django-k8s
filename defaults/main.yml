@@ -1,48 +1,56 @@
 ---
-KUBE_CONFIG: "~/.kube/config"
-KUBE_CONTEXT: ""
+k8s_kube_config: "~/.kube/config"
+k8s_kube_context: ""
 
-KUBERNETES_TEMPLATES:
+k8s_domain_names:
+- www.example.com
+
+k8s_namespace: "echoserver"
+
+k8s_memcached_enabled: false
+k8s_memcached_version: "1.5.19"
+
+k8s_redis_enabled: false
+k8s_redis_version: "5.0.6"
+k8s_redis_volume_size: "20Gi"
+
+k8s_environment_variables: {}
+
+k8s_container_name: web
+k8s_container_image: k8s.gcr.io/echoserver
+k8s_container_image_tag: "1.10"
+k8s_container_port: 8080
+k8s_container_replicas: 2
+k8s_container_ingress_path: /
+
+k8s_web_protocol: http  # Must be the same for all containers
+k8s_web_containers:
+- name: "{{ k8s_container_name }}"
+  image: "{{ k8s_container_image }}"
+  tag: "{{ k8s_container_image_tag }}"
+  replicas: "{{ k8s_container_replicas }}"
+  port: "{{ k8s_container_port }}"
+  ingress_path: "{{ k8s_container_ingress_path }}"
+  environment: "{{ k8s_environment_variables }}"
+
+k8s_worker_enabled: false
+k8s_worker_replicas: 2
+k8s_worker_celery_app: ""
+k8s_worker_container:
+  image: "{{ k8s_container_image }}"
+  tag: "{{ k8s_container_image_tag }}"
+  replicas: "{{ k8s_worker_replicas }}"
+  celery_app: "{{ k8s_worker_celery_app }}"
+  environment: "{{ k8s_environment_variables }}"
+
+k8s_templates:
 - name: namespace.yaml.j2
-  state: present
-- name: redis.yaml.j2
-  state: present
-- name: memcached.yaml.j2
   state: present
 - name: web.yaml.j2
   state: present
+- name: redis.yaml.j2
+  state: "{{ k8s_redis_enabled | ternary('present', 'absent') }}"
+- name: memcached.yaml.j2
+  state: "{{ k8s_memcached_enabled | ternary('present', 'absent') }}"
 - name: workers.yaml.j2
-  state: absent
-
-DOMAIN_NAMES:
-- www.example.com
-
-NAMESPACE: "echoserver"
-
-MEMCACHED_VERSION: "1.5.19"
-
-REDIS_VERSION: "5.0.6"
-REDIS_VOLUME_SIZE: "20Gi"
-
-CONTAINER_IMAGE: k8s.gcr.io/echoserver
-CONTAINER_IMAGE_TAG: "1.10"
-CONTAINER_PORT: 8080
-
-ENVIRONMENT_VARIABLES: {}
-
-WEB_PROTOCOL: http  # Must be the same for all containers
-WEB_CONTAINERS:
-- name: web
-  image: "{{ CONTAINER_IMAGE }}"
-  tag: "{{ CONTAINER_IMAGE_TAG }}"
-  replicas: 2
-  port: "{{ CONTAINER_PORT }}"
-  ingress_path: /
-  environment: "{{ ENVIRONMENT_VARIABLES }}"
-
-WORKER_CONTAINER:
-  image: "{{ CONTAINER_IMAGE }}"
-  tag: "{{ CONTAINER_IMAGE_TAG }}"
-  replicas: 2
-  celery_app: ""
-  environment: "{{ ENVIRONMENT_VARIABLES }}"
+  state: "{{ k8s_worker_enabled | ternary('present', 'absent') }}"

@@ -4,20 +4,20 @@ metadata:
   name: "celery-secrets"
   labels:
     app: "celery"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 type: Opaque
-stringData: {{ WORKER_CONTAINER["environment"] | to_yaml }}
+stringData: {{ k8s_worker_container["environment"] | to_yaml }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "celery-worker"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   selector:
     matchLabels:
       app: "celery-worker"
-  replicas: {{ WORKER_CONTAINER["replicas"] }}
+  replicas: {{ k8s_worker_container["replicas"] }}
   template:
     metadata:
       labels:
@@ -25,9 +25,9 @@ spec:
     spec:
       containers:
       - name: "celery-worker"
-        image: "{{ WORKER_CONTAINER["image"] }}:{{ WORKER_CONTAINER["tag"] }}"
+        image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
         imagePullPolicy: IfNotPresent
-        args: ["celery", "--app={{ WORKER_CONTAINER["celery_app"] }}", "worker", "--workdir=/code", "--loglevel=info"]
+        args: ["celery", "--app={{ k8s_worker_container["celery_app"] }}", "worker", "--workdir=/code", "--loglevel=info"]
         env:
         - name: GET_HOSTS_FROM
           value: dns
@@ -41,7 +41,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: beatvolume-claim
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   accessModes:
   - ReadWriteOnce
@@ -53,7 +53,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: "celery-beat"
-  namespace: "{{ NAMESPACE }}"
+  namespace: "{{ k8s_namespace }}"
 spec:
   selector:
     matchLabels:
@@ -66,9 +66,9 @@ spec:
     spec:
       containers:
       - name: "celery-beat"
-        image: "{{ WORKER_CONTAINER["image"] }}:{{ WORKER_CONTAINER["tag"] }}"
+        image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
         imagePullPolicy: IfNotPresent
-        args: ["celery", "--app={{ WORKER_CONTAINER["celery_app"] }}", "beat", "--workdir=/code", "--loglevel=info", "--pidfile=/data/beat.pid", "--schedule=/data/schedulefile.db"]
+        args: ["celery", "--app={{ k8s_worker_container["celery_app"] }}", "beat", "--workdir=/code", "--loglevel=info", "--pidfile=/data/beat.pid", "--schedule=/data/schedulefile.db"]
         env:
         - name: GET_HOSTS_FROM
           value: dns
