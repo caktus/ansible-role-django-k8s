@@ -1,7 +1,7 @@
 caktus.django-k8s
 =================
 
-Ansible role to with sane defaults to deploy a Django app with Celery to Kubernetes
+An Ansible role with sane defaults to deploy a Django app to Kubernetes.
 
 
 License
