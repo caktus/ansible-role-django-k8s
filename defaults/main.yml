@@ -16,20 +16,23 @@ k8s_redis_volume_size: "20Gi"
 
 k8s_environment_variables: {}
 
+k8s_ingress_certificate_issuer: letsencrypt-production
+
 k8s_container_name: web
 k8s_container_image: k8s.gcr.io/echoserver
 k8s_container_image_tag: "1.10"
 k8s_container_port: 8080
+k8s_container_protocol: http
 k8s_container_replicas: 2
 k8s_container_ingress_path: /
 
-k8s_web_protocol: http  # Must be the same for all containers
 k8s_web_containers:
 - name: "{{ k8s_container_name }}"
   image: "{{ k8s_container_image }}"
   tag: "{{ k8s_container_image_tag }}"
   replicas: "{{ k8s_container_replicas }}"
   port: "{{ k8s_container_port }}"
+  protocol: "{{ k8s_container_protocol }}"
   ingress_path: "{{ k8s_container_ingress_path }}"
   environment: "{{ k8s_environment_variables }}"
 
