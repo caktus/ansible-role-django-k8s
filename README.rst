@@ -64,3 +64,5 @@ Installation
               k8s_kube_context: <name of context from ~/.kube/config>
               k8s_domain_names:
               - www.example.com
+
+See ``defaults/main.yml`` for all the variables that can be overridden.
