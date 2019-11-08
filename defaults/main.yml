@@ -24,7 +24,8 @@ k8s_container_image_tag: "1.10"
 k8s_container_port: 8080
 k8s_container_protocol: http
 k8s_container_replicas: 2
-k8s_container_ingress_path: /
+k8s_container_ingress_paths:
+  - /
 
 k8s_web_containers:
 - name: "{{ k8s_container_name }}"
@@ -33,7 +34,7 @@ k8s_web_containers:
   replicas: "{{ k8s_container_replicas }}"
   port: "{{ k8s_container_port }}"
   protocol: "{{ k8s_container_protocol }}"
-  ingress_path: "{{ k8s_container_ingress_path }}"
+  ingress_paths: "{{ k8s_container_ingress_paths }}"
   environment: "{{ k8s_environment_variables }}"
 
 k8s_worker_enabled: false

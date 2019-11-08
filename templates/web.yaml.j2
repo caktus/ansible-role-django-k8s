@@ -95,9 +95,11 @@ spec:
   - host: "{{ domain }}"
     http:
       paths:
-      - path: "{{ container["ingress_path"] }}"
+{% for ingress_path in container["ingress_paths"] %}
+      - path: "{{ ingress_path }}"
         backend:
           serviceName: "{{ container["name"] }}"
           servicePort: {{ container["port"] }}
+{% endfor %}
 {% endfor %}
 {% endfor %}
