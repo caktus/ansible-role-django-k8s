@@ -26,7 +26,7 @@ spec:
       containers:
       - name: "celery-worker"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: "{{ k8s_worker_container["image_pull_policy"] }}"
         args: ["celery", "--app={{ k8s_worker_container["celery_app"] }}", "worker", "--workdir=/code", "--loglevel=info"]
         env:
         - name: GET_HOSTS_FROM
