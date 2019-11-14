@@ -27,7 +27,7 @@ spec:
       containers:
       - name: "{{ container["name"] }}"
         image: "{{ container["image"] }}:{{ container["tag"] }}"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: "{{ container["image_pull_policy"] }}"
         env:
         - name: GET_HOSTS_FROM
           value: dns
