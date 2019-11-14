@@ -25,6 +25,13 @@ k8s_container_image_tag: "1.10"
 k8s_container_port: 8080
 k8s_container_protocol: http
 k8s_container_replicas: 2
+k8s_container_resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "1000m"
 k8s_container_ingress_paths:
   - /
 
@@ -34,6 +41,7 @@ k8s_web_containers:
     image_pull_policy: "{{ k8s_container_image_pull_policy }}"
     tag: "{{ k8s_container_image_tag }}"
     replicas: "{{ k8s_container_replicas }}"
+    resources: "{{ k8s_container_resources }}"
     port: "{{ k8s_container_port }}"
     protocol: "{{ k8s_container_protocol }}"
     ingress_paths: "{{ k8s_container_ingress_paths }}"
@@ -44,12 +52,14 @@ k8s_worker_image: "{{ k8s_container_image }}"
 k8s_worker_image_pull_policy: "{{ k8s_container_image_pull_policy }}"
 k8s_worker_image_tag: "{{ k8s_container_image_tag }}"
 k8s_worker_replicas: 2
+k8s_worker_resources: "{{ k8s_container_resources }}"
 k8s_worker_celery_app: ""
 k8s_worker_container:
   image: "{{ k8s_worker_image }}"
   image_pull_policy: "{{ k8s_worker_image_pull_policy }}"
   tag: "{{ k8s_worker_image_tag }}"
   replicas: "{{ k8s_worker_replicas }}"
+  resources: "{{ k8s_worker_resources }}"
   celery_app: "{{ k8s_worker_celery_app }}"
   environment: "{{ k8s_environment_variables }}"
 
