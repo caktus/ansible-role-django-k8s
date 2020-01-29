@@ -14,6 +14,10 @@ k8s_redis_enabled: false
 k8s_redis_version: "5.0.6"
 k8s_redis_volume_size: "20Gi"
 
+k8s_elasticsearch_enabled: false
+k8s_elasticsearch_version: "6.5.0"
+k8s_elasticsearch_volume_size: "20Gi"
+
 k8s_environment_variables: {}
 
 k8s_ingress_certificate_issuer: letsencrypt-production
@@ -68,6 +72,8 @@ k8s_templates:
     state: present
   - name: redis.yaml.j2
     state: "{{ k8s_redis_enabled | ternary('present', 'absent') }}"
+  - name: elasticsearch.yaml.j2
+    state: "{{ k8s_elasticsearch_enabled | ternary('present', 'absent') }}"
   - name: memcached.yaml.j2
     state: "{{ k8s_memcached_enabled | ternary('present', 'absent') }}"
   - name: web.yaml.j2
