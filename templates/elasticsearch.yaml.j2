@@ -102,7 +102,7 @@ spec:
   - metadata:
       name: es-data
     spec:
-      accessModes: [ "ReadWriteOnce" ]
+      accessModes: ["ReadWriteOnce"]
       resources:
         requests:
           storage: {{ k8s_elasticsearch_volume_size }}
