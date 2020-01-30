@@ -5,7 +5,7 @@ metadata:
   namespace: "{{ k8s_namespace }}"
 data:
   elasticsearch.yml: |
-    cluster.name: my-elastic-cluster
+    cluster.name: "{{ k8s_elasticsearch_cluster_name }}"
     network.host: "0.0.0.0"
     bootstrap.memory_lock: false
     discovery.zen.ping.unicast.hosts: elasticsearch-cluster
