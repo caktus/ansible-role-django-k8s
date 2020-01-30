@@ -107,6 +107,7 @@ spec:
         requests:
           storage: {{ k8s_elasticsearch_volume_size }}
 ---
+# Service definition for making API calls to elasticsearch from within the cluster
 apiVersion: v1
 kind: Service
 metadata:
