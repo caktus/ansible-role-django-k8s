@@ -16,7 +16,7 @@ k8s_redis_volume_size: "20Gi"
 
 k8s_elasticsearch_enabled: false
 k8s_elasticsearch_cluster_name: "app-elasticsearch-cluster"
-k8s_elasticsearch_version: "6.8.6"
+k8s_elasticsearch_version: "7.5.2"
 k8s_elasticsearch_volume_size: "20Gi"
 
 k8s_environment_variables: {}
