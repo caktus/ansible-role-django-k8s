@@ -6,6 +6,7 @@ metadata:
 data:
   elasticsearch.yml: |
     cluster.name: "{{ k8s_elasticsearch_cluster_name }}"
+    cluster.initial_master_nodes: esnode-0,esnode-1
     network.host: "0.0.0.0"
     bootstrap.memory_lock: false
     discovery.zen.ping.unicast.hosts: elasticsearch-cluster
