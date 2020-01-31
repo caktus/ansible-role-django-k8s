@@ -9,7 +9,7 @@ data:
     cluster.initial_master_nodes: esnode-0,esnode-1
     network.host: "0.0.0.0"
     bootstrap.memory_lock: false
-    discovery.seed_hosts: elasticsearch-cluster
+    discovery.zen.ping.unicast.hosts: elasticsearch-cluster
     xpack.security.enabled: false
     xpack.monitoring.enabled: false
   ES_JAVA_OPTS: -Xms512m -Xmx512m
@@ -63,7 +63,7 @@ spec:
         readinessProbe:
           httpGet:
             scheme: HTTP
-            path: /_cluster/health?local=true
+            path: /_cluster/health?local=true&wait_for_status=green
             port: 9200
           initialDelaySeconds: 5
         ports:
