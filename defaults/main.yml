@@ -1,6 +1,23 @@
 ---
+# IMPORTANT!
+# ansible-role-django-k8s performs a two-step deploy process.
+# First, it uses your (admin) credentials to create a namespace and service account;
+# those admin credentials should be defined with a combination of these variables:
+# (i.e., in your local ~/.kube/config):
 k8s_kube_config: "~/.kube/config"
 k8s_kube_context: ""
+
+# Next, after the service account is created, it obtains the authentication token
+# from the server and uses that to create the remaining resources in the namespace.
+# This allows you to store an encrypted copy of k8s_auth_api_key in version control
+# for continous deployment from your CI/CD service, with access only to this namespace.
+#
+# You'll need to set your k8s_auth_host (Kubernetes API server) and k8s_auth_ssl_ca_cert
+# (certificate authority) appropriately; you can obtain these from your ~/.kube/config
+# (they should also be stored in the repo, but don't need to be encrypted).
+k8s_auth_api_key: ""
+k8s_auth_host: ""
+k8s_auth_ssl_ca_cert: ""  # should be a file path (relative to deploy.yaml)
 
 # An empty dictionary, or the Python representation of your ~/.docker/config.json,
 # which can easily be generated with Ansible. For example, to provide credentials
@@ -84,8 +101,6 @@ k8s_worker_container:
 k8s_worker_beat_enabled: false
 
 k8s_templates:
-  - name: namespace.yaml.j2
-    state: present
   - name: registry_secret.yaml.j2
     state: "{{ k8s_dockerconfigjson | ternary('present', 'absent') }}"
   - name: redis.yaml.j2
