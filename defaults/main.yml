@@ -29,9 +29,6 @@ k8s_container_resources:
   requests:
     memory: "256Mi"
     cpu: "250m"
-  limits:
-    memory: "512Mi"
-    cpu: "1000m"
 k8s_container_ingress_paths:
   - /
 
