@@ -114,6 +114,9 @@ metadata:
 {% else %}{# Disable basic auth, in case it was enabled previously. #}
     nginx.ingress.kubernetes.io/auth-type: ""
 {% endif %}
+{% for key, value in container["ingress_annotations"].items() %}
+    {{ key }}: "{{ value }}"
+{% endfor %}
 spec:
   rules:
 {% for domain in k8s_domain_names %}
