@@ -86,6 +86,17 @@ spec:
   - host: "{{ domain }}"
 {% endfor %}
 {% for container in k8s_web_containers %}
+{% if container["htpasswd"] %}
+---
+apiVersion: v1
+data:
+  auth: {{ container["htpasswd"] | b64encode }}
+kind: Secret
+metadata:
+  name: basic-auth-{{ container["name"] }}
+  namespace: "{{ k8s_namespace }}"
+type: Opaque
+{% endif %}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -96,6 +107,13 @@ metadata:
     kubernetes.io/ingress.class: nginx
     nginx.org/mergeable-ingress-type: minion
     nginx.ingress.kubernetes.io/backend-protocol: "{{ container["protocol"] }}"
+{% if container["htpasswd"] %}
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth-{{ container["name"] }}
+    nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
+{% else %}{# Disable basic auth, in case it was enabled previously. #}
+    nginx.ingress.kubernetes.io/auth-type: ""
+{% endif %}
 spec:
   rules:
 {% for domain in k8s_domain_names %}
