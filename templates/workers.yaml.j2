@@ -29,6 +29,12 @@ spec:
       labels:
         app: "celery-worker"
     spec:
+{% if k8s_dockerconfigjson %}
+      imagePullSecrets:
+      - name: registry-secret
+{% else %}
+      imagePullSecrets: []
+{% endif %}
       containers:
       - name: "celery-worker"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
@@ -71,6 +77,12 @@ spec:
       labels:
         app: "celery-beat"
     spec:
+{% if k8s_dockerconfigjson %}
+      imagePullSecrets:
+      - name: registry-secret
+{% else %}
+      imagePullSecrets: []
+{% endif %}
       containers:
       - name: "celery-beat"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
