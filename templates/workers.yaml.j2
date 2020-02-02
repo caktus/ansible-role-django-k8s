@@ -43,6 +43,7 @@ spec:
         - secretRef:
             name: "celery-secrets"
         resources: {{ k8s_worker_container["resources"] | to_json }}
+{% if k8s_worker_beat_enabled %}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -92,3 +93,4 @@ spec:
         - name: beatvolume
           persistentVolumeClaim:
             claimName: beatvolume-claim
+{% endif %}
