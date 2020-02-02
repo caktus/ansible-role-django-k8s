@@ -1,4 +1,14 @@
 ---
+# For simplicity, even though the k8s module will use K8S_AUTH_API_KEY if set, we
+# retrieve it from the environment ourselves at the start of the play so we know
+# if we should try to create the namespace and service account or not. This also
+# allows us to support setting k8s_auth_api_key through an Ansible variable or
+# environment variable.
+- name: Set k8s_auth_api_key from environment variable
+  set_fact:
+    k8s_auth_api_key: "{{ ansible_env.K8S_AUTH_API_KEY }}"
+  when: ansible_env.K8S_AUTH_API_KEY is defined
+
 - name: Create/update namespace
   k8s:
     context: "{{ k8s_kube_context }}"
