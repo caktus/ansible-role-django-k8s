@@ -113,5 +113,5 @@ k8s_templates:
     state: present
   - name: workers.yaml.j2
     state: "{{ k8s_worker_enabled | ternary('present', 'absent') }}"
-  - name: workers-beat.yaml.j2
-    state: "{{ k8s_worker_enabled and k8s_worker_beat_enabled | ternary('present', 'absent') }}"
+  - name: workers_beat.yaml.j2
+    state: "{{ (k8s_worker_enabled and k8s_worker_beat_enabled) | ternary('present', 'absent') }}"
