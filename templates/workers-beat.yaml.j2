@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "celery-beat"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  serviceName: "celery-beat"
+  selector:
+    matchLabels:
+      app: "celery-beat"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "celery-beat"
+    spec:
+{% if k8s_dockerconfigjson %}
+      imagePullSecrets:
+      - name: registry-secret
+{% else %}
+      imagePullSecrets: []
+{% endif %}
+      containers:
+      - name: "celery-beat"
+        image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
+        imagePullPolicy: IfNotPresent
+        args: ["celery", "--app={{ k8s_worker_container["celery_app"] }}", "beat", "--workdir=/code", "--loglevel=info", "--pidfile=/data/beat.pid", "--schedule=/data/schedulefile.db"]
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        - name: PYTHONPATH
+          value: .
+        envFrom:
+        - secretRef:
+            name: "celery-secrets"
+        volumeMounts:
+          - mountPath: /data
+            name: beatvolume-claim
+        resources: {{ k8s_worker_container["resources"] | to_json }}
+  volumeClaimTemplates:
+  - metadata:
+      name: beatvolume-claim
+      namespace: "{{ k8s_namespace }}"
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: beat-service
+  namespace: "{{ k8s_namespace }}"
+spec:
+  clusterIP: None
+  selector:
+    app: celery-beat

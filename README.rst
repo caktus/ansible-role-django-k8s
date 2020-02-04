@@ -66,3 +66,25 @@ Installation
               - www.example.com
 
 See ``defaults/main.yml`` for all the variables that can be overridden.
+
+
+Configuration
+-------------
+
+
+Celery
+``````
+
+.. code-block:: yaml
+
+  # Required to enable:
+  k8s_worker_enabled: true
+  k8s_worker_celery_app: "<app.celery.name>"
+  k8s_worker_beat_enabled: true  # only if beat is needed
+
+  # Optional variables (with defaults):
+  k8s_worker_replicas: 2
+  k8s_worker_image: "{{ k8s_container_image }}"
+  k8s_worker_image_pull_policy: "{{ k8s_container_image_pull_policy }}"
+  k8s_worker_image_tag: "{{ k8s_container_image_tag }}"
+  k8s_worker_resources: "{{ k8s_container_resources }}"
