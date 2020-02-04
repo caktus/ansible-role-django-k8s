@@ -70,6 +70,8 @@ k8s_worker_container:
   celery_app: "{{ k8s_worker_celery_app }}"
   environment: "{{ k8s_environment_variables }}"
 
+k8s_worker_beat_enabled: false
+
 k8s_templates:
   - name: namespace.yaml.j2
     state: present
@@ -83,3 +85,5 @@ k8s_templates:
     state: present
   - name: workers.yaml.j2
     state: "{{ k8s_worker_enabled | ternary('present', 'absent') }}"
+  - name: workers-beat.yaml.j2
+    state: "{{ k8s_worker_enabled and k8s_worker_beat_enabled | ternary('present', 'absent') }}"
