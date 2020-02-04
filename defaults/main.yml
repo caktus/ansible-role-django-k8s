@@ -2,6 +2,17 @@
 k8s_kube_config: "~/.kube/config"
 k8s_kube_context: ""
 
+# An empty dictionary, or the Python representation of your ~/.docker/config.json,
+# which can easily be generated with Ansible. For example, to provide credentials
+# for Docker Hub:
+# docker_hub_user: myusername
+# docker_hub_password: mysupersecretpass
+# k8s_dockerconfigjson:
+#   auths:
+#     https://index.docker.io/v1/:
+#       auth: "{{ [docker_hub_user, docker_hub_password] | join(':') | b64encode }}"
+k8s_dockerconfigjson: {}
+
 k8s_domain_names:
   - www.example.com
 
@@ -75,6 +86,8 @@ k8s_worker_beat_enabled: false
 k8s_templates:
   - name: namespace.yaml.j2
     state: present
+  - name: registry_secret.yaml.j2
+    state: "{{ k8s_dockerconfigjson | ternary('present', 'absent') }}"
   - name: redis.yaml.j2
     state: "{{ k8s_redis_enabled | ternary('present', 'absent') }}"
   - name: elasticsearch.yaml.j2
