@@ -16,6 +16,7 @@ rules:
       - apps
       - extensions
     resources:
+      - configmaps
       - deployments
       - ingresses
       - persistentvolumeclaims
@@ -23,6 +24,7 @@ rules:
       - replicasets
       - secrets
       - services
+      - statefulsets
     verbs: ["*"]
 ---
 kind: RoleBinding
