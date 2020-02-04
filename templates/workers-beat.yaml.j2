@@ -1,21 +1,10 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: beatvolume-claim
-  namespace: "{{ k8s_namespace }}"
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: "celery-beat"
   namespace: "{{ k8s_namespace }}"
 spec:
+  serviceName: "celery-beat"
   selector:
     matchLabels:
       app: "celery-beat"
@@ -40,9 +29,25 @@ spec:
             name: "celery-secrets"
         volumeMounts:
           - mountPath: /data
-            name: beatvolume
+            name: beatvolume-claim
         resources: {{ k8s_worker_container["resources"] | to_json }}
-      volumes:
-        - name: beatvolume
-          persistentVolumeClaim:
-            claimName: beatvolume-claim
+  volumeClaimTemplates:
+  - metadata:
+      name: beatvolume-claim
+      namespace: "{{ k8s_namespace }}"
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+---
+# Service definition for the different elasticsearch instances to find each other
+apiVersion: v1
+kind: Service
+metadata:
+  name: beat-service
+  namespace: "{{ k8s_namespace }}"
+spec:
+  clusterIP: None
+  selector:
+    app: celery-beat
