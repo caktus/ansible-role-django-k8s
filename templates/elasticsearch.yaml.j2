@@ -62,11 +62,33 @@ spec:
                   name: es-config
                   key: ES_JAVA_OPTS
         readinessProbe:
-          httpGet:
-            scheme: HTTP
-            path: /_cluster/health?local=true&wait_for_status=green
-            port: 9200
           initialDelaySeconds: 5
+          exec:
+            command:
+              - sh
+              - -c
+              - |
+                #!/usr/bin/env bash -e
+                # If the node is starting up wait for the cluster to be ready' )
+                # Once it has started only check that the node itself is responding
+                START_FILE=/tmp/.es_start_file
+                http () {
+                    local path="${1}"
+                    curl -XGET -s -k --fail http://127.0.0.1:9200${path}
+                }
+                if [ -f "${START_FILE}" ]; then
+                    echo 'Elasticsearch is already running, lets check the node is healthy and there are master nodes available'
+                    http "/_cluster/health?timeout=0s"
+                else
+                    echo 'Waiting for elasticsearch cluster to become ready" )'
+                    if http "/_cluster/health?wait_for_status=green&timeout=1s" ; then
+                        touch ${START_FILE}
+                        exit 0
+                    else
+                        echo 'Cluster is not yet ready" )'
+                        exit 1
+                    fi
+                fi
         ports:
         - containerPort: 9200
           name: es-http
