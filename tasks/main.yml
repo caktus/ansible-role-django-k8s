@@ -1,8 +1,67 @@
 ---
-- name: Create/update resources in Kubernetes
+# For simplicity, even though the k8s module will use K8S_AUTH_API_KEY if set, we
+# retrieve it from the environment ourselves at the start of the play so we know
+# if we should try to create the namespace and service account or not. This also
+# allows us to support setting k8s_auth_api_key through an Ansible variable or
+# environment variable.
+- name: Set k8s_auth_api_key from environment variable
+  set_fact:
+    k8s_auth_api_key: "{{ ansible_env.K8S_AUTH_API_KEY }}"
+  when: ansible_env.K8S_AUTH_API_KEY is defined
+
+- name: Create/update namespace
   k8s:
     context: "{{ k8s_kube_context }}"
     kubeconfig: "{{ k8s_kube_config }}"
+    definition: "{{ lookup('template', 'namespace.yaml.j2') }}"
+    state: present
+    # Ensure we see any failures in CI
+    wait: yes
+    validate:
+      fail_on_error: yes
+      strict: yes
+  when: not k8s_auth_api_key
+
+- name: Create/update deploy account
+  k8s:
+    context: "{{ k8s_kube_context }}"
+    kubeconfig: "{{ k8s_kube_config }}"
+    definition: "{{ lookup('template', 'deploy_account.yaml.j2') }}"
+    state: present
+    # Ensure we see any failures in CI
+    wait: yes
+    validate:
+      fail_on_error: yes
+      strict: yes
+  register: deploy_account
+  when: not k8s_auth_api_key
+
+- name: Get deploy account token
+  k8s_info:
+    kind: Secret
+    namespace: "{{ k8s_namespace }}"
+    name: "{{ deploy_account.result.results.0.result.secrets.0.name }}"
+  register: deploy_account_token
+  when: not k8s_auth_api_key
+
+- name: Set k8s_auth_api_key
+  set_fact:
+    k8s_auth_api_key: "{{ deploy_account_token.resources.0.data.token | b64decode }}"
+  when: not k8s_auth_api_key
+
+- name: Output k8s_auth_api_key
+  debug: var=k8s_auth_api_key
+  when: echo_token is defined and echo_token
+
+- name: Fail if k8s_auth_host or k8s_auth_ssl_ca_cert is unset
+  fail: msg="k8s_auth_host or k8s_auth_ssl_ca_cert not set!"
+  when: not (k8s_auth_host and k8s_auth_ssl_ca_cert)
+
+- name: Create/update templates in Kubernetes
+  k8s:
+    api_key: "{{ k8s_auth_api_key }}"
+    host: "{{ k8s_auth_host }}"
+    ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
     definition: "{{ lookup('template', item['name']) }}"
     state: "{{ item['state'] }}"
     # Ensure we see any failures in CI
@@ -11,3 +70,4 @@
       fail_on_error: yes
       strict: yes
   with_items: "{{ k8s_templates }}"
+  when: k8s_auth_host and k8s_auth_ssl_ca_cert
