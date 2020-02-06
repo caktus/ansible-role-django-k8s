@@ -46,6 +46,7 @@ k8s_elasticsearch_enabled: false
 k8s_elasticsearch_cluster_name: "app-elasticsearch-cluster"
 k8s_elasticsearch_version: "7.5.2"
 k8s_elasticsearch_volume_size: "20Gi"
+k8s_elasticsearch_replicas: 3
 
 k8s_environment_variables: {}
 

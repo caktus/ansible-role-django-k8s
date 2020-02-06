@@ -21,7 +21,7 @@ metadata:
   namespace: "{{ k8s_namespace }}"
 spec:
   serviceName: elasticsearch
-  replicas: 2
+  replicas: {{ k8s_elasticsearch_replicas }}
   updateStrategy:
     type: RollingUpdate
   selector:
