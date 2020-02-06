@@ -80,12 +80,12 @@ spec:
                     echo 'Elasticsearch is already running, lets check the node is healthy and there are master nodes available'
                     http "/_cluster/health?timeout=0s"
                 else
-                    echo 'Waiting for elasticsearch cluster to become ready" )'
+                    echo 'Waiting for elasticsearch cluster to become ready'
                     if http "/_cluster/health?wait_for_status=green&timeout=1s" ; then
                         touch ${START_FILE}
                         exit 0
                     else
-                        echo 'Cluster is not yet ready" )'
+                        echo 'Cluster is not yet ready'
                         exit 1
                     fi
                 fi
