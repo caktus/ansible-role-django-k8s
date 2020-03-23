@@ -3,6 +3,8 @@ caktus.django-k8s
 
 An Ansible role with sane defaults to deploy a Django app to Kubernetes.
 
+It also tries to arrange to be able to update the deploy from an automated
+CI service without requiring manual intervention for authentication.
 
 License
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -67,6 +69,25 @@ Installation
 
 See ``defaults/main.yml`` for all the variables that can be overridden.
 
+Usage
+-----
+
+This should be run first interactively by a user who is already set up to access the
+cluster using kubectl. E.g., they can run `kubectl cluster-info` and see the
+cluster info. How to achieve that will differ by Kubernetes hosting environment.
+
+When run the first time, this will figure out some information using the
+user's kubectl access that the user will need to save in Ansible variables
+for later use by the CI test service.
+
+This role will also create a "deploy account" in Kubernetes which has the
+necessary permissions to deploy. It will print out a long random
+string which is the secret that can be used later to do Kubernetes activities
+using that deploy account (e.g. during CI tests and deploys).
+
+Follow the instructions that are printed during that first run (putting some
+information into variables and files). Then run again, and this time it should
+complete successfully having created the various K8S objects.
 
 Configuration
 -------------
