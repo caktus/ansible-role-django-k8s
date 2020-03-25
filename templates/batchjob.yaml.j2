@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: "{{ k8s_namespace }}"
+  name: "{{ job_name }}"
+spec:
+  template:
+    spec:
+      containers:
+      - name: "{{ k8s_container_name }}"
+        image: "{{ k8s_container_image }}:{{ k8s_container_image_tag }}"
+        imagePullPolicy: "{{ k8s_container_image_pull_policy }}"
+        command: {{ batch_command }}
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        envFrom:
+        - secretRef:
+            name: "{{ k8s_container_name }}-secrets"
+        ports:
+        - containerPort: {{ k8s_container_port }}
+        resources: {{ k8s_container_resources | to_json }}
+      restartPolicy: Never
+  backoffLimit: 4

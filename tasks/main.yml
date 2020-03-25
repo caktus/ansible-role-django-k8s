@@ -57,6 +57,35 @@
   fail: msg="k8s_auth_host or k8s_auth_ssl_ca_cert not set!"
   when: not (k8s_auth_host and k8s_auth_ssl_ca_cert)
 
+# Run migrations if wanted
+- when: k8s_migrations_enabled
+  vars:
+    job_name: "migrate"
+    batch_command: "{{ k8s_migration_command }}"
+  block:
+  - name: remove any old migration jobs
+    k8s:
+      api_key: "{{ k8s_auth_api_key }}"
+      host: "{{ k8s_auth_host }}"
+      ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+      definition: "{{ lookup('template', 'batchjob.yaml.j2') }}"
+      state: absent
+      wait: yes
+      validate:
+        fail_on_error: yes
+        strict: yes
+  - name: run migrations
+    k8s:
+      api_key: "{{ k8s_auth_api_key }}"
+      host: "{{ k8s_auth_host }}"
+      ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+      definition: "{{ lookup('template', 'batchjob.yaml.j2') }}"
+      state: present
+      wait: yes
+      validate:
+        fail_on_error: yes
+        strict: yes
+
 - name: Create/update templates in Kubernetes
   k8s:
     api_key: "{{ k8s_auth_api_key }}"
