@@ -93,6 +93,28 @@ k8s_worker_image_tag: "{{ k8s_container_image_tag }}"
 k8s_worker_replicas: 2
 k8s_worker_resources: "{{ k8s_container_resources }}"
 k8s_worker_celery_app: ""
+k8s_worker_command:
+  - celery
+  - --app
+  - "{{ k8s_worker_celery_app }}"
+  - worker
+  - --workdir
+  - "/code"
+  - --loglevel
+  - "info"
+k8s_worker_beat_command:
+  - celery 
+  - --app
+  - "{{ k8s_worker_celery_app }}" 
+  - beat 
+  - --workdir
+  - "/code" 
+  - --loglevel
+  - "info" 
+  - --pidfile
+  - "/data/beat.pid" 
+  - --schedule
+  - "/data/schedulefile.db"
 k8s_worker_container:
   image: "{{ k8s_worker_image }}"
   image_pull_policy: "{{ k8s_worker_image_pull_policy }}"
@@ -101,6 +123,8 @@ k8s_worker_container:
   resources: "{{ k8s_worker_resources }}"
   celery_app: "{{ k8s_worker_celery_app }}"
   environment: "{{ k8s_environment_variables }}"
+  worker_command: "{{ k8s_worker_command }}"
+  beat_command: "{{ k8s_worker_beat_command }}"
 
 k8s_worker_beat_enabled: false
 
