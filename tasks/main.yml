@@ -82,6 +82,9 @@
       definition: "{{ lookup('template', 'batchjob.yaml.j2') }}"
       state: present
       wait: yes
+      wait_condition:
+        type: Complete
+        status: "True"
       validate:
         fail_on_error: yes
         strict: yes
