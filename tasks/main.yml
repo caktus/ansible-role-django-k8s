@@ -20,6 +20,24 @@
 #
 # when communicating with the cluster. This makes sure we're talking to the right one.
 
+- block:
+  - name: Query nodes to check cluster connection using {{ k8s_auth_host }} and the user's kubectl context
+    k8s_info:
+      kind: Node
+      host: "{{ k8s_auth_host }}"
+    register: node_query_result
+    ignore_errors: True
+
+  - name: Fail play if above Node query was unsuccessful
+    fail:
+      msg: |
+        *************************************************************************************************************************************
+        Unable to access the cluster. Are you using the correct kubectl context? (Especially if the previous message was about an SSLError.)"
+        *************************************************************************************************************************************
+    when:
+      - "'rc' in node_query_result"
+      - node_query_result.rc == 1
+
 # Does the user need to set k8s_auth_ssl_ca_cert?
 - when: not k8s_auth_ssl_ca_cert
   block:

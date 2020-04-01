@@ -73,6 +73,8 @@ The ``k8s_auth_host`` variable is absolutely required to be set. This is the API
 endpoint URL of the cluster to use. Here are some examples so you can see what
 it might look like:
 
+AKS: ``https://ratom-staging-dns-ba5d6fd2.hcp.eastus.azmk8s.io:443``
+
 AWS: ``https://74406E3AD450E7845D0EF653E7C6F020.gr7.us-west-2.eks.amazonaws.com``
 
 Digital Ocean: ``https://fc22cd06-0dc4-4e19-a1cd-e0064d2d151e.k8s.ondigitalocean.com``
