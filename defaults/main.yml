@@ -101,6 +101,15 @@ k8s_worker_container:
 
 k8s_worker_beat_enabled: false
 
+k8s_migrations_enabled: true
+k8s_migration_command:
+  - python
+  - manage.py
+  - migrate
+  - --noinput
+  - -v
+  - "2"
+
 k8s_templates:
   - name: registry_secret.yaml.j2
     state: "{{ k8s_dockerconfigjson | ternary('present', 'absent') }}"

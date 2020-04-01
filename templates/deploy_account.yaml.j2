@@ -14,11 +14,13 @@ rules:
   - apiGroups:
       - ""
       - apps
+      - batch
       - extensions
     resources:
       - configmaps
       - deployments
       - ingresses
+      - jobs
       - persistentvolumeclaims
       - pods
       - replicasets
