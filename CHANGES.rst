@@ -6,7 +6,7 @@ Changes
 -------
 
 
-v0.0.2 on TBD
+v0.0.2 on Apr 15, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * Made some changes to simplify setting up a deploy account so this can be run from
