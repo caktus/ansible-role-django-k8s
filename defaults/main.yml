@@ -3,9 +3,6 @@
 # ansible-role-django-k8s performs a two-step deploy process.
 # First, it uses your (admin) credentials to create a namespace and service account;
 # those admin credentials should be defined with a combination of these variables:
-# (i.e., in your local ~/.kube/config):
-k8s_kube_config: "~/.kube/config"
-k8s_kube_context: ""
 
 # Next, after the service account is created, it obtains the authentication token
 # from the server and uses that to create the remaining resources in the namespace.
