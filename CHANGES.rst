@@ -5,8 +5,8 @@ caktus.django-k8s
 Changes
 -------
 
-Next release
-------------
+v0.0.3 on Apr 28, 2020
+~~~~~~~~~~~~~~~~~~~~~~
 
 * If ``k8s_rollout_after_deploy`` is ``true``, use rollout to ensure that pods are restarted
   when we deploy. This ensures that even if our image tag is unchanged (like if
