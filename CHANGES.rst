@@ -5,6 +5,13 @@ caktus.django-k8s
 Changes
 -------
 
+Next release
+------------
+
+* Use rollout to ensure that pods are restarted when we deploy. This ensures
+  that even if our image tag is unchanged (like if we're using a branch name),
+  we'll still pull the latest image with that tag and be running it when the
+  deploy completes.
 
 v0.0.2 on Apr 15, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
