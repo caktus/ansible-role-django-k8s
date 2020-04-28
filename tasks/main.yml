@@ -172,3 +172,17 @@
       fail_on_error: yes
       strict: yes
   with_items: "{{ k8s_templates }}"
+
+- when: k8s_rollout_after_deploy
+  block:
+  - name: Do a rollout so we get our services updated even if image tags didn't change
+    command: kubectl --namespace "{{ k8s_namespace }}" rollout restart deployment/{{ item["name"] }}
+    with_items: "{{ k8s_web_containers }}"
+
+  - name: Do a rollout for celery workers
+    command: kubectl --namespace "{{ k8s_namespace }}" rollout restart deployment/celery-worker
+    when: k8s_worker_enabled
+
+  - name: Do a rollout for celery beat
+    command: kubectl --namespace "{{ k8s_namespace }}" rollout restart statefulset/celery-beat
+    when: k8s_worker_beat_enabled

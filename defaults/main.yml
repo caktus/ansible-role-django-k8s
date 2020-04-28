@@ -27,6 +27,15 @@ k8s_auth_ssl_ca_cert: ""  # should be a file path (relative to deploy.yaml)
 #       auth: "{{ [docker_hub_user, docker_hub_password] | join(':') | b64encode }}"
 k8s_dockerconfigjson: {}
 
+# Whether to do a "kubectl rollout restart" on each deploy.
+# This should be unnecessary if deploys are using unique image tags,
+# but might be desired if a project is using tags like 'latest'
+# or 'staging' that will refer to different tags at different times,
+# to make sure the latest version of the image with that tag gets
+# pulled and used. When setting this 'true', ensure you also set
+# `k8s_container_image_pull_policy: Always`
+k8s_rollout_after_deploy: False
+
 k8s_domain_names:
   - www.example.com
 
