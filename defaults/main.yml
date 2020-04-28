@@ -32,7 +32,8 @@ k8s_dockerconfigjson: {}
 # but might be desired if a project is using tags like 'latest'
 # or 'staging' that will refer to different tags at different times,
 # to make sure the latest version of the image with that tag gets
-# pulled and used.
+# pulled and used. When setting this 'true', ensure you also set
+# `k8s_container_image_pull_policy: Always`
 k8s_rollout_after_deploy: False
 
 k8s_domain_names:
