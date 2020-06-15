@@ -5,6 +5,11 @@ caktus.django-k8s
 Changes
 -------
 
+vNEXT on TBD
+~~~~~~~~~~~~
+
+* Wait until Job-created migration pod returns ``Completed`` status before continuing deploy
+
 v0.0.3 on Apr 28, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
 
