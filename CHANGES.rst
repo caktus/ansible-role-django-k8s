@@ -5,10 +5,12 @@ caktus.django-k8s
 Changes
 -------
 
-vNEXT on TBD
-~~~~~~~~~~~~
+v0.0.4 on Jun 15, 2020
+~~~~~~~~~~~~~~~~~~~~~~
 
-* Wait until Job-created migration pod returns ``Completed`` status before continuing deploy
+* Wait until Job-created migration pod returns ``Completed`` status before continuing
+  deploy
+* Set celery-beat ImagePullPolicy to match user-configured setting
 
 v0.0.3 on Apr 28, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
