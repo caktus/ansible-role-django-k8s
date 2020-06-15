@@ -9,53 +9,126 @@
     k8s_auth_api_key: "{{ ansible_env.K8S_AUTH_API_KEY }}"
   when: ansible_env.K8S_AUTH_API_KEY is defined
 
-- name: Create/update namespace
-  k8s:
-    context: "{{ k8s_kube_context }}"
-    kubeconfig: "{{ k8s_kube_config }}"
-    definition: "{{ lookup('template', 'namespace.yaml.j2') }}"
-    state: present
-    # Ensure we see any failures in CI
-    wait: yes
-    validate:
-      fail_on_error: yes
-      strict: yes
-  when: not k8s_auth_api_key
+# Does the user need to set k8s_auth_host?
+- when: not k8s_auth_host
+  fail:
+    msg: "k8s_auth_host must be set. Please see the role documentation."
 
-- name: Create/update deploy account
+# FROM here on, always specify
+#
+#          host: "{{ k8s_auth_host }}"
+#
+# when communicating with the cluster. This makes sure we're talking to the right one.
+
+# CHECK that the right kubectl context is set. Note that this will fail to run at all if we're running
+# in CI without a kubectl context, and that's okay so long as we have enough other information
+# to run without it, which we'll check next.
+- name: See what host the current kubectl context is using
+  command: kubectl config view --minify=true -o jsonpath='{.clusters[0].cluster.server}' --raw
+  register: context_out
+  ignore_errors: true
+- set_fact:
+    host_from_kubectl: "{{ (context_out is succeeded) and context_out.stdout }}"
+    kubeconfig_valid: "{{ (context_out is succeeded) and (context_out.stdout == k8s_auth_host) }}"
+
+# If we don't have all the config we need to work without kubectl,
+# check that kubectl has the right context set because we'll need it.
+- when: not kubeconfig_valid and ((not k8s_auth_ssl_ca_cert) or (not k8s_auth_api_key))
+  fail:
+    msg: |
+       *************************************************************
+
+       The current kubectl context does not match the k8s_auth_host,
+       or is simply not working for some reason.
+       The Ansible variable k8s_auth_host is {{ k8s_auth_host }}
+       The host from the kubectl context is {{ host_from_kubectl }}
+       Please use 'kubectl config use-context' to change to the
+       context for the cluster you're deploying to.  You can list
+       your contexts with 'kubectl config get-contexts'
+
+       *************************************************************
+
+# Does the user need to set k8s_auth_ssl_ca_cert?
+- when: not k8s_auth_ssl_ca_cert
+  block:
+    - command: kubectl config view --minify=true -o jsonpath='{.clusters[0].cluster.certificate-authority-data}' --raw
+      register: data_command
+    - debug:
+         msg: |
+           1) Create a file (maybe k8s_auth_ssl_ca_cert.txt) and set contents to
+           {{ data_command.stdout | b64decode }}
+           with all indentation removed. (This does not need to be secret.)
+           2) Set k8s_auth_ssl_ca_cert to the path to the file.
+           3) Run again after doing that
+
+# Does the user need to set k8s_auth_api_key?
+- when: not k8s_auth_api_key
+  block:
+  - name: Create/update namespace (needed for deploy account)
+    k8s:
+      definition: "{{ lookup('template', 'namespace.yaml.j2') }}"
+      state: present
+      host: "{{ k8s_auth_host }}"
+      # Ensure we see any failures in CI
+      wait: yes
+      validate:
+        fail_on_error: yes
+        strict: yes
+
+  - name: Create/update deploy account
+    k8s:
+      definition: "{{ lookup('template', 'deploy_account.yaml.j2') }}"
+      state: present
+      host: "{{ k8s_auth_host }}"
+      # Ensure we see any failures in CI
+      wait: yes
+      validate:
+        fail_on_error: yes
+        strict: yes
+    register: deploy_account
+
+  - set_fact:
+      deploy_account_name: "{{ deploy_account.result.results.0.result.secrets.0.name }}"
+
+  - name: Get deploy account secret (contains secret token=k8s_auth_api_key)
+    k8s_info:
+      kind: Secret
+      namespace: "{{ k8s_namespace }}"
+      name: "{{ deploy_account_name }}"
+      host: "{{ k8s_auth_host }}"
+    register: deploy_account_secret
+
+  - debug:
+      msg: |
+        # Set a variable as follows:
+        k8s_auth_api_key: "{{ deploy_account_secret.resources.0.data.token | b64decode }}"
+        # THIS MUST BE KEPT SECRET, so encrypt the entry or the variables file.
+        # Then run again.
+
+# Did we have to show the user some settings that needed to be made?
+- when: not k8s_auth_ssl_ca_cert or not k8s_auth_api_key
+  fail:
+    msg: "Please follow the instructions above, then run again"
+
+# FROM here on, we have the information we need to use the deploy account instead of
+# the user's own credentials to deploy etc in our Kubernetes cluster.  api_key and
+# ca_cert provide authentication and authorization. host is to specify which cluster
+# to talk to.
+
+# The definition of the deploy account may have changed, so make sure it is current.
+# Just note that the deploy account doesn't have permission to change itself, so we
+# can only do this when we've been run with valid kubeconfig access.
+- when: kubeconfig_valid
+  name: Update deploy account
   k8s:
-    context: "{{ k8s_kube_context }}"
-    kubeconfig: "{{ k8s_kube_config }}"
     definition: "{{ lookup('template', 'deploy_account.yaml.j2') }}"
     state: present
+    host: "{{ k8s_auth_host }}"
     # Ensure we see any failures in CI
     wait: yes
     validate:
       fail_on_error: yes
       strict: yes
-  register: deploy_account
-  when: not k8s_auth_api_key
-
-- name: Get deploy account token
-  k8s_info:
-    kind: Secret
-    namespace: "{{ k8s_namespace }}"
-    name: "{{ deploy_account.result.results.0.result.secrets.0.name }}"
-  register: deploy_account_token
-  when: not k8s_auth_api_key
-
-- name: Set k8s_auth_api_key
-  set_fact:
-    k8s_auth_api_key: "{{ deploy_account_token.resources.0.data.token | b64decode }}"
-  when: not k8s_auth_api_key
-
-- name: Output k8s_auth_api_key
-  debug: var=k8s_auth_api_key
-  when: echo_token is defined and echo_token
-
-- name: Fail if k8s_auth_host or k8s_auth_ssl_ca_cert is unset
-  fail: msg="k8s_auth_host or k8s_auth_ssl_ca_cert not set!"
-  when: not (k8s_auth_host and k8s_auth_ssl_ca_cert)
 
 # Run migrations if wanted
 - when: k8s_migrations_enabled
@@ -92,8 +165,8 @@
 - name: Create/update templates in Kubernetes
   k8s:
     api_key: "{{ k8s_auth_api_key }}"
-    host: "{{ k8s_auth_host }}"
     ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+    host: "{{ k8s_auth_host }}"
     definition: "{{ lookup('template', item['name']) }}"
     state: "{{ item['state'] }}"
     # Ensure we see any failures in CI
@@ -102,4 +175,17 @@
       fail_on_error: yes
       strict: yes
   with_items: "{{ k8s_templates }}"
-  when: k8s_auth_host and k8s_auth_ssl_ca_cert
+
+- when: k8s_rollout_after_deploy
+  block:
+  - name: Do a rollout so we get our services updated even if image tags didn't change
+    command: kubectl --namespace "{{ k8s_namespace }}" rollout restart deployment/{{ item["name"] }}
+    with_items: "{{ k8s_web_containers }}"
+
+  - name: Do a rollout for celery workers
+    command: kubectl --namespace "{{ k8s_namespace }}" rollout restart deployment/celery-worker
+    when: k8s_worker_enabled
+
+  - name: Do a rollout for celery beat
+    command: kubectl --namespace "{{ k8s_namespace }}" rollout restart statefulset/celery-beat
+    when: k8s_worker_beat_enabled

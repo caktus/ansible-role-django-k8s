@@ -3,9 +3,6 @@
 # ansible-role-django-k8s performs a two-step deploy process.
 # First, it uses your (admin) credentials to create a namespace and service account;
 # those admin credentials should be defined with a combination of these variables:
-# (i.e., in your local ~/.kube/config):
-k8s_kube_config: "~/.kube/config"
-k8s_kube_context: ""
 
 # Next, after the service account is created, it obtains the authentication token
 # from the server and uses that to create the remaining resources in the namespace.
@@ -29,6 +26,15 @@ k8s_auth_ssl_ca_cert: ""  # should be a file path (relative to deploy.yaml)
 #     https://index.docker.io/v1/:
 #       auth: "{{ [docker_hub_user, docker_hub_password] | join(':') | b64encode }}"
 k8s_dockerconfigjson: {}
+
+# Whether to do a "kubectl rollout restart" on each deploy.
+# This should be unnecessary if deploys are using unique image tags,
+# but might be desired if a project is using tags like 'latest'
+# or 'staging' that will refer to different tags at different times,
+# to make sure the latest version of the image with that tag gets
+# pulled and used. When setting this 'true', ensure you also set
+# `k8s_container_image_pull_policy: Always`
+k8s_rollout_after_deploy: False
 
 k8s_domain_names:
   - www.example.com
