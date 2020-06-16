@@ -20,6 +20,8 @@ spec:
 {% else %}
       imagePullSecrets: []
 {% endif %}
+      securityContext:
+        fsGroup: 2000
       containers:
       - name: "celery-beat"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
