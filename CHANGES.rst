@@ -5,6 +5,12 @@ caktus.django-k8s
 Changes
 -------
 
+v0.0.5 on Jun 16, 2020
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Add ``fsGroup`` to the beat service which allows that service to access the data
+  volume, if it is not running as root.
+
 v0.0.4 on Jun 15, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
 
