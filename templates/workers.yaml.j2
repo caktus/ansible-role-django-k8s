@@ -39,7 +39,7 @@ spec:
       - name: "celery-worker"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
         imagePullPolicy: "{{ k8s_worker_container["image_pull_policy"] }}"
-        args: ["celery", "--app={{ k8s_worker_container["celery_app"] }}", "worker", "--workdir=/code", "--loglevel=info"]
+        command: {{ k8s_worker_container["worker_command"] }}
         env:
         - name: GET_HOSTS_FROM
           value: dns

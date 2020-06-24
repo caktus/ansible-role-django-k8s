@@ -26,7 +26,7 @@ spec:
       - name: "celery-beat"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
         imagePullPolicy: "{{ k8s_worker_container["image_pull_policy"] }}"
-        args: ["celery", "--app={{ k8s_worker_container["celery_app"] }}", "beat", "--workdir=/code", "--loglevel=info", "--pidfile=/data/beat.pid", "--schedule=/data/schedulefile.db"]
+        command: {{ k8s_worker_container["beat_command"] }}
         env:
         - name: GET_HOSTS_FROM
           value: dns
