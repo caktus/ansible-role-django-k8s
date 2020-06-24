@@ -5,6 +5,11 @@ caktus.django-k8s
 Changes
 -------
 
+vNext
+~~~~~
+
+* Allow full customization of the arguments to the celery command. (#17)
+
 v0.0.5 on Jun 16, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
 
