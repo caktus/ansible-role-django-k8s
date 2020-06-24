@@ -24,7 +24,7 @@ spec:
       - name: "celery-beat"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
         imagePullPolicy: IfNotPresent
-        command: {{ beat_command }} 
+        command: {{ k8s_worker_container["beat_command"] }} 
         env:
         - name: GET_HOSTS_FROM
           value: dns
