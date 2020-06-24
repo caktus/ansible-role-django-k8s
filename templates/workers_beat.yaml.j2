@@ -20,11 +20,13 @@ spec:
 {% else %}
       imagePullSecrets: []
 {% endif %}
+      securityContext:
+        fsGroup: 2000
       containers:
       - name: "celery-beat"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
-        imagePullPolicy: IfNotPresent
-        command: {{ k8s_worker_container["beat_command"] }} 
+        imagePullPolicy: "{{ k8s_worker_container["image_pull_policy"] }}"
+        command: {{ k8s_worker_container["beat_command"] }}
         env:
         - name: GET_HOSTS_FROM
           value: dns
