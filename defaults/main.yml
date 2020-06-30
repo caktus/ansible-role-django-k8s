@@ -101,26 +101,18 @@ k8s_worker_resources: "{{ k8s_container_resources }}"
 k8s_worker_celery_app: ""
 k8s_worker_command:
   - celery
-  - --app
-  - "{{ k8s_worker_celery_app }}"
+  - --app={{ k8s_worker_celery_app }}
   - worker
-  - --workdir
-  - "/code"
-  - --loglevel
-  - "info"
+  - --workdir=/code
+  - --loglevel=info
 k8s_worker_beat_command:
-  - celery 
-  - --app
-  - "{{ k8s_worker_celery_app }}" 
-  - beat 
-  - --workdir
-  - "/code" 
-  - --loglevel
-  - "info" 
-  - --pidfile
-  - "/data/beat.pid" 
-  - --schedule
-  - "/data/schedulefile.db"
+  - celery
+  - --app={{ k8s_worker_celery_app }}
+  - beat
+  - --workdir=/code
+  - --loglevel=info
+  - --pidfile=/data/beat.pid
+  - --schedule=/data/schedulefile.db
 k8s_worker_container:
   image: "{{ k8s_worker_image }}"
   image_pull_policy: "{{ k8s_worker_image_pull_policy }}"
