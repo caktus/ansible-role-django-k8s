@@ -135,6 +135,15 @@ k8s_migration_command:
   - -v
   - "2"
 
+k8s_collectstatic_enabled: true
+k8s_collectstatic_command:
+  - python
+  - manage.py
+  - collectstatic
+  - --noinput
+  - -v
+  - "2"
+
 k8s_templates:
   - name: registry_secret.yaml.j2
     state: "{{ k8s_dockerconfigjson | ternary('present', 'absent') }}"
