@@ -26,7 +26,8 @@ spec:
       - name: "celery-beat"
         image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
         imagePullPolicy: "{{ k8s_worker_container["image_pull_policy"] }}"
-        command: {{ k8s_worker_container["beat_command"] }}
+        # command: do not override `command:` as we want to run the docker-entrypoint.sh before starting args
+        args: {{ k8s_worker_container["beat_command"] }}
         env:
         - name: GET_HOSTS_FROM
           value: dns
