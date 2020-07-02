@@ -5,10 +5,12 @@ caktus.django-k8s
 Changes
 -------
 
-vNext
-~~~~~
+v0.0.6 on Jul 2, 2020
+~~~~~~~~~~~~~~~~~~~~~
 
-* Allow full customization of the arguments to the celery command. (#17)
+* Allow full customization of the arguments to the celery command. (#17, #23)
+* Enable ``collectstatic`` command to run during deploy (#24)
+
 
 v0.0.5 on Jun 16, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
