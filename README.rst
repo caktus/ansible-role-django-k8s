@@ -120,6 +120,8 @@ password, so ansible can decrypt the ``k8s_auth_api_key`` value.
 Configuration
 -------------
 
+Review all of the variables in ``defaults/main.yml`` to see which configuration options
+are available.
 
 Celery
 ``````
