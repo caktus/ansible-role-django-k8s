@@ -40,6 +40,9 @@
 #
 
 # https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
+# Possibly replace in future with (to remove eksctl requirement):
+#    1. https://docs.aws.amazon.com/cli/latest/reference/iam/create-open-id-connect-provider.html
+#    2. https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
 - name: create an IAM OIDC identity provider for the cluster
   command: "eksctl utils associate-iam-oidc-provider --cluster {{ k8s_s3_cluster_name }} --approve"
   register: associate_response
