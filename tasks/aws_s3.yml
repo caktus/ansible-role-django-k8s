@@ -33,7 +33,7 @@
       - --bucket
       - "{{ k8s_s3_private_bucket }}"
       - --public-access-block-configuration
-      - BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=false
+      - BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
 
 #
 # IAM OIDC identity provider and issuer
