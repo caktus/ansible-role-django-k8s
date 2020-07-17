@@ -1,0 +1,25 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:aws:s3:::{{ k8s_s3_public_bucket }}",
+        "arn:aws:s3:::{{ k8s_s3_private_bucket }}",
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:*"
+      ],
+      "Resource": [
+        "arn:aws:s3:::{{ k8s_s3_public_bucket }}/*",
+        "arn:aws:s3:::{{ k8s_s3_private_bucket }}/*"
+      ]
+    }
+  ]
+}

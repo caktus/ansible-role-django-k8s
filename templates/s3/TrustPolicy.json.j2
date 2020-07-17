@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::{{ aws_account_id }}:oidc-provider/{{ oidc_issuer }}"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "{{ oidc_issuer }}:sub": "system:serviceaccount:{{ k8s_s3_namespace }}:{{ k8s_s3_serviceaccount }}"
+        }
+      }
+    }
+  ]
+}

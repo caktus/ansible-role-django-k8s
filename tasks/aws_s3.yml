@@ -1,0 +1,104 @@
+---
+
+#
+# Public S3 assets bucket
+#
+
+- name: "create public bucket {{ k8s_s3_public_bucket }}"
+  s3_bucket:
+    name: "{{ k8s_s3_public_bucket }}"
+    state: present
+    versioning: yes
+    region: "{{ k8s_s3_region }}"
+
+#
+# Private S3 assets bucket
+#
+
+- name: "create private bucket {{ k8s_s3_private_bucket }}"
+  s3_bucket:
+    name: "{{ k8s_s3_private_bucket }}"
+    state: present
+    versioning: yes
+    region: "{{ k8s_s3_region }}"
+    encryption: AES256
+
+# Not available via Ansible module as of 7/2020
+- name: "block all public access to {{ k8s_s3_private_bucket }}"
+  command:
+    argv:
+      - aws
+      - s3api
+      - put-public-access-block
+      - --bucket
+      - "{{ k8s_s3_private_bucket }}"
+      - --public-access-block-configuration
+      - BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=false
+
+#
+# IAM OIDC identity provider and issuer
+#
+
+# https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html
+- name: create an IAM OIDC identity provider for the cluster
+  command: "eksctl utils associate-iam-oidc-provider --cluster {{ k8s_s3_cluster_name }} --approve"
+  register: associate_response
+  changed_when: "'created' in associate_response.stdout"
+
+# Not available via Ansible module as of 7/2020
+- name: describe cluster to obtain OIDC issuer
+  command: "aws eks describe-cluster --region {{ k8s_s3_region }} --name {{ k8s_s3_cluster_name }} --output json"
+  changed_when: false
+  register: cluster_query
+
+- name: parse OIDC issuer from response
+  set_fact:
+    oidc_issuer: "{{ cluster_query.stdout | from_json | json_query('cluster.identity.oidc.issuer') | regex_replace('https://') }}"
+
+#
+# AWS Account ID
+#
+
+- name: get the current caller identity information
+  aws_caller_info:
+  register: caller_info
+
+- name: parse AWS account ID
+  set_fact:
+    aws_account_id: "{{ caller_info.account }}"
+
+#
+# IAM Role
+#
+
+# https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html
+- name: Create IAM role for K8s service account
+  iam_role:
+    name: "{{ k8s_s3_iam_role }}"
+    assume_role_policy_document: "{{ lookup('template', 's3/TrustPolicy.json.j2') }}"
+    description: IAM role for K8s service account
+
+- name: Attach inline policy to user
+  iam_policy:
+    iam_type: role
+    iam_name: "{{ k8s_s3_iam_role }}"
+    policy_name: "EKSBucketPolicy"
+    state: present
+    policy_json: "{{ lookup( 'template', 's3/AssetManagementPolicy.json.j2') }}"
+
+#
+# Service Account
+#
+
+# https://docs.aws.amazon.com/eks/latest/userguide/specify-service-account-role.html
+- name: "Associate IAM role with the service account in your cluster"
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: "{{ k8s_s3_serviceaccount }}"
+        namespace: "{{ k8s_s3_namespace }}"
+        annotations:
+          eks.amazonaws.com/role-arn: "arn:aws:iam::{{ aws_account_id }}:role/{{ k8s_s3_iam_role }}"
