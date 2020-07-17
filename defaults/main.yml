@@ -144,7 +144,7 @@ k8s_collectstatic_command:
   - -v
   - "2"
 
-k8s_s3_cluster_name: ""
+k8s_s3_cluster_name: ""  # name of EKS cluster in AWS
 k8s_s3_region: "us-east-1"
 k8s_s3_namespace: "{{ k8s_namespace }}"
 k8s_s3_iam_role: "S3ServiceAccountRole-{{ k8s_s3_namespace }}"
