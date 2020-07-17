@@ -170,7 +170,7 @@ A separate playbook can be used to invoke this functionality:
 .. code-block:: yaml
 
   ---
-  # file: s3.yaml
+  # file: deploy-s3.yaml
 
   - hosts: k8s
     vars:
@@ -181,3 +181,5 @@ A separate playbook can be used to invoke this functionality:
         import_role:
           name: caktus.django-k8s
           tasks_from: aws_s3
+
+Run with: ``ansible-playbook deploy-s3.yml``.
