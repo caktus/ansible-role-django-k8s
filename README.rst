@@ -139,3 +139,45 @@ Celery
   k8s_worker_image_pull_policy: "{{ k8s_container_image_pull_policy }}"
   k8s_worker_image_tag: "{{ k8s_container_image_tag }}"
   k8s_worker_resources: "{{ k8s_container_resources }}"
+
+
+Amazon S3: IAM role for service accounts
+````````````````````````````````````````
+
+Django applications running on AWS typically use Amazon S3 for static and media
+resources. ``caktus.django-k8s`` optionally supports enabling a Kubernetes
+service account and associated IAM role that defines the access to public and
+private S3 buckets. This provides similar functionality of
+`EC2 instance profiles <https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2.html>`_
+within Kubernetes namespaces. This
+`AWS blog post <https://aws.amazon.com/blogs/opensource/introducing-fine-grained-iam-roles-service-accounts/>`_
+also provides a good overview.
+
+At a high level, the process is:
+
+1. Create public and private S3 buckets
+2. `Enable IAM roles for cluster service accounts <https://docs.aws.amazon.com/eks/latest/userguide/enable-iam-roles-for-service-accounts.html>`_
+    * Requirement: `eksctl <https://eksctl.io/introduction/#installation>`_ must be installed
+3. `Create an IAM role with a trust relatinoship and S3 policy for a service account <https://docs.aws.amazon.com/eks/latest/userguide/create-service-account-iam-policy-and-role.html>`_
+4. `Annotate the service account with the ARN of the IAM role <https://docs.aws.amazon.com/eks/latest/userguide/specify-service-account-role.html>`_
+
+Required variables:
+
+  * ``k8s_s3_cluster_name``: name of EKS cluster in AWS
+
+A separate playbook can be used to invoke this functionality:
+
+.. code-block:: yaml
+
+  ---
+  # file: s3.yaml
+
+  - hosts: k8s
+    vars:
+      ansible_connection: local
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    tasks:
+      - name: configure Amazon S3 buckets
+        import_role:
+          name: caktus.django-k8s
+          tasks_from: aws_s3
