@@ -5,6 +5,12 @@ caktus.django-k8s
 Changes
 -------
 
+v0.0.7 on Jul 28, 2020
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Support environment-specific Amazon S3 bucket creation (#27)
+
+
 v0.0.6 on Jul 2, 2020
 ~~~~~~~~~~~~~~~~~~~~~
 
