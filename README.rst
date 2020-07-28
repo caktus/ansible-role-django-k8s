@@ -144,7 +144,7 @@ Celery
 Amazon S3: IAM role for service accounts
 ````````````````````````````````````````
 
-Django applications running on AWS typically use Amazon S3 for static and media
+Web applications running on AWS typically use Amazon S3 for static and media
 resources. ``caktus.django-k8s`` optionally supports enabling a Kubernetes
 service account and associated IAM role that defines the access to public and
 private S3 buckets. This provides similar functionality of
