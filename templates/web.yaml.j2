@@ -84,7 +84,7 @@ metadata:
 spec:
   tls:
   - hosts:
-{% for domain in k8s_domain_names %}
+{% for domain in k8s_domain_names + k8s_redirect_domain_names %}
     - "{{ domain }}"
 {% endfor %}
     secretName: "{{ k8s_namespace }}-tls"
