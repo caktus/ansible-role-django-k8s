@@ -38,6 +38,7 @@ k8s_rollout_after_deploy: False
 
 k8s_domain_names:
   - www.example.com
+k8s_redirect_domain_names: []
 
 k8s_namespace: "echoserver"
 
