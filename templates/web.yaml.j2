@@ -89,7 +89,7 @@ spec:
 {% endfor %}
     secretName: "{{ k8s_namespace }}-tls"
   rules:
-{% for domain in k8s_domain_names %}
+{% for domain in k8s_domain_names + k8s_domain_redirects %}
   - host: "{{ domain }}"
 {% endfor %}
 {% for container in k8s_web_containers %}
@@ -142,4 +142,24 @@ spec:
           servicePort: {{ container["port"] }}
 {% endfor %}
 {% endfor %}
+{% if k8s_domain_redirects %}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: "ingress-redirect"
+  namespace: "{{ k8s_namespace }}"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "{{ container["protocol"] }}"
+    nginx.ingress.kubernetes.io/server-snippet: |
+      if ($host ~* ^({{ k8s_domain_redirects | default([]) | join('|') }})$) {
+          return 301 $scheme://{{ k8s_domain_names[0] }}$request_uri;
+      }
+spec:
+  rules:
+{% for domain in k8s_domain_redirects %}
+  - host: "{{ domain }}"
+{% endfor %}
+{% endif %}
 {% endfor %}
