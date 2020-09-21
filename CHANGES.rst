@@ -5,6 +5,12 @@ caktus.django-k8s
 Changes
 -------
 
+v0.0.8 on Sep 21, 2020
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Suport redirect from www.domain.com to domain.com or vice versa.
+
+
 v0.0.7 on Jul 28, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
 
