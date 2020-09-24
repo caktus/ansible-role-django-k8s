@@ -38,6 +38,14 @@ k8s_rollout_after_deploy: False
 
 k8s_domain_names:
   - www.example.com
+# In some scenarios is required to redirect from www.domain.com to
+# domain.com or vice versa (feature of NGINX Ingress Controller).
+#   Note: If enabled, the redirected domain must be manually added
+#   to the k8s_ingress_tls_domains_extra variable to create a
+#   corresponding TLS certificate, e.g,:
+#     k8s_ingress_tls_domains_extra: [example.com]
+#   https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/annotations/#redirect-fromto-www
+k8s_domain_from_to_www_redirect: false
 
 k8s_namespace: "echoserver"
 
@@ -60,6 +68,10 @@ k8s_elasticsearch_resources:
 k8s_environment_variables: {}
 
 k8s_ingress_certificate_issuer: letsencrypt-production
+# user-provided additional domain names to be associated with
+# TLS certificate as Subject Alternative Name(s)
+k8s_ingress_tls_domains_extra: []
+k8s_ingress_tls_domains: "{{ k8s_domain_names + k8s_ingress_tls_domains_extra }}"
 
 k8s_container_name: web
 k8s_container_image: k8s.gcr.io/echoserver
