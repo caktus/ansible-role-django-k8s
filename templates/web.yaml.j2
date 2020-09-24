@@ -84,7 +84,7 @@ metadata:
 spec:
   tls:
   - hosts:
-{% for domain in k8s_domain_names %}
+{% for domain in k8s_ingress_tls_domains %}
     - "{{ domain }}"
 {% endfor %}
     secretName: "{{ k8s_namespace }}-tls"
@@ -120,6 +120,11 @@ metadata:
     nginx.ingress.kubernetes.io/auth-realm: "Authentication Required"
 {% else %}{# Disable basic auth, in case it was enabled previously. #}
     nginx.ingress.kubernetes.io/auth-type: ""
+{% endif %}
+{% if k8s_domain_from_to_www_redirect %}
+    nginx.ingress.kubernetes.io/from-to-www-redirect: 'true'
+{% else %}
+    nginx.ingress.kubernetes.io/from-to-www-redirect: 'false'
 {% endif %}
 {% for key, value in container["ingress_annotations"].items() %}
     {{ key }}: "{{ value }}"
