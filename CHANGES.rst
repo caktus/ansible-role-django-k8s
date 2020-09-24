@@ -5,9 +5,10 @@ caktus.django-k8s
 Changes
 -------
 
-v0.0.8 on Sep 21, 2020
+v0.0.8 on Sep 24, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
 
+* Add customizable ``k8s_collectstatic_timeout`` variable
 * Suport redirect from www.domain.com to domain.com or vice versa.
 
 

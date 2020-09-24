@@ -189,6 +189,7 @@
       wait_condition:
         type: Complete
         status: "True"
+      wait_timeout: "{{ k8s_collectstatic_timeout }}"
       validate:
         fail_on_error: yes
         strict: yes
