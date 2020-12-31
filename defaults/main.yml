@@ -57,10 +57,11 @@ k8s_redis_version: "5.0.6"
 k8s_redis_volume_size: "20Gi"
 
 k8s_elasticsearch_enabled: false
+k8s_elasticsearch_loadbalancer_enabled: false
 k8s_elasticsearch_cluster_name: "app-elasticsearch-cluster"
 k8s_elasticsearch_version: "7.5.2"
 k8s_elasticsearch_volume_size: "20Gi"
-k8s_elasticsearch_replicas: 3
+k8s_elasticsearch_node_replicas: 3
 k8s_elasticsearch_resources:
   requests:
     memory: "1Gi"
@@ -172,6 +173,8 @@ k8s_templates:
     state: "{{ k8s_redis_enabled | ternary('present', 'absent') }}"
   - name: elasticsearch.yaml.j2
     state: "{{ k8s_elasticsearch_enabled | ternary('present', 'absent') }}"
+  - name: k8s_elasticsearch_loadbalancer.yaml.j2
+    state: "{{ k8s_elasticsearch_loadbalancer_enabled | ternary('present', 'absent') }}"
   - name: memcached.yaml.j2
     state: "{{ k8s_memcached_enabled | ternary('present', 'absent') }}"
   - name: web.yaml.j2
