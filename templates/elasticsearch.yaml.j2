@@ -1,3 +1,21 @@
+---
+# Service definition for making API calls to elasticsearch from within the cluster
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+  labels:
+    app: elasticsearch
+  namespace: "{{ k8s_namespace }}"
+spec:
+# The service only needs 9300 to mediate master elections and node communication
+  clusterIP: None
+  selector:
+    app: es-cluster
+  ports:
+  - name: transport
+    port: 9300
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -9,7 +27,8 @@ data:
     cluster.initial_master_nodes: esnode-0
     network.host: "0.0.0.0"
     bootstrap.memory_lock: false
-    discovery.seed_hosts: elasticsearch-cluster
+    discovery.zen.ping.unicast.hosts: elasticsearch
+    discovery.zen.minimum_master_nodes: 1
     xpack.security.enabled: false
     xpack.monitoring.enabled: false
   ES_JAVA_OPTS: -Xms512m -Xmx512m
@@ -20,13 +39,13 @@ metadata:
   name: esnode
   namespace: "{{ k8s_namespace }}"
 spec:
-  serviceName: elasticsearch
-  replicas: {{ k8s_elasticsearch_replicas }}
-  updateStrategy:
-    type: RollingUpdate
   selector:
     matchLabels:
       app: es-cluster
+  serviceName: elasticsearch
+  replicas: {{ k8s_elasticsearch_node_replicas }}
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
@@ -59,33 +78,11 @@ spec:
                   name: es-config
                   key: ES_JAVA_OPTS
         readinessProbe:
-          initialDelaySeconds: 10
-          exec:
-            command:
-              - sh
-              - -c
-              - |
-                #!/usr/bin/env bash -e
-                # If the node is starting up wait for the cluster to be ready' )
-                # Once it has started only check that the node itself is responding
-                START_FILE=/tmp/.es_start_file
-                http () {
-                    local path="${1}"
-                    curl -XGET -s -k --fail http://127.0.0.1:9200${path}
-                }
-                if [ -f "${START_FILE}" ]; then
-                    echo 'Elasticsearch is already running, lets check the node is healthy and there are master nodes available'
-                    http "/_cluster/health?timeout=0s"
-                else
-                    echo 'Waiting for elasticsearch cluster to become ready'
-                    if http "/_cluster/health?wait_for_status=green&timeout=1s" ; then
-                        touch ${START_FILE}
-                        exit 0
-                    else
-                        echo 'Cluster is not yet ready'
-                        exit 1
-                    fi
-                fi
+          httpGet:
+            scheme: HTTP
+            path: /_cluster/health?local=true
+            port: 9200
+          initialDelaySeconds: 5
         ports:
         - containerPort: 9200
           name: es-http
@@ -112,35 +109,4 @@ spec:
       resources:
         requests:
           storage: {{ k8s_elasticsearch_volume_size }}
----
-# Service definition for the different elasticsearch instances to find each other
-apiVersion: v1
-kind: Service
-metadata:
-  name: elasticsearch-cluster
-  namespace: "{{ k8s_namespace }}"
-spec:
-  clusterIP: None
-  selector:
-    app: es-cluster
-  ports:
-  - name: transport
-    port: 9300
----
-# Service definition for making API calls to elasticsearch from within the cluster
-apiVersion: v1
-kind: Service
-metadata:
-  name: "elasticsearch"
-  labels:
-    app: "elasticsearch"
-  namespace: "{{ k8s_namespace }}"
-spec:
-  ports:
-  - protocol: TCP
-    # Where other things in the cluster should try to connect to our application
-    port: 9200
-    # Where our application is listening:
-    targetPort: 9200
-  selector:
-    app: "es-cluster"
+

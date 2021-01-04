@@ -4,6 +4,9 @@ caktus.django-k8s
 
 Changes
 -------
+v0.0.9 on Jan 4, 2021
+~~~~~~~~~~~~~~~~~~~~~
+* Fixes elasticsearch bug that did not allow pods to return to running state after deletion.
 
 v0.0.8 on Sep 24, 2020
 ~~~~~~~~~~~~~~~~~~~~~~
