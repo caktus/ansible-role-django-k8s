@@ -130,6 +130,20 @@
       fail_on_error: yes
       strict: yes
 
+- name: Create/update templates in Kubernetes
+  k8s:
+    api_key: "{{ k8s_auth_api_key }}"
+    ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+    host: "{{ k8s_auth_host }}"
+    definition: "{{ lookup('template', item['name']) }}"
+    state: "{{ item['state'] }}"
+    # Ensure we see any failures in CI
+    wait: yes
+    validate:
+      fail_on_error: yes
+      strict: yes
+  with_items: "{{ k8s_templates }}"
+
 # Run migrations if wanted
 - when: k8s_migrations_enabled
   vars:
@@ -193,20 +207,6 @@
       validate:
         fail_on_error: yes
         strict: yes
-
-- name: Create/update templates in Kubernetes
-  k8s:
-    api_key: "{{ k8s_auth_api_key }}"
-    ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
-    host: "{{ k8s_auth_host }}"
-    definition: "{{ lookup('template', item['name']) }}"
-    state: "{{ item['state'] }}"
-    # Ensure we see any failures in CI
-    wait: yes
-    validate:
-      fail_on_error: yes
-      strict: yes
-  with_items: "{{ k8s_templates }}"
 
 - when: k8s_rollout_after_deploy
   block:
