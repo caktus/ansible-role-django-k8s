@@ -1,3 +1,9 @@
+{#
+Anywhere we need to inject a non-scalar value, we use to_json instead of to_yaml because it:
+1) more reliably includes wrapping {}
+2) behaves identically on Python 2 and Python 3
+(and all JSON is valid YAML).
+#}
 {% for container in k8s_web_containers %}
 apiVersion: apps/v1
 kind: Deployment
