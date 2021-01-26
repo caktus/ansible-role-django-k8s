@@ -87,11 +87,11 @@
         strict: yes
 
   - name: Get deploy account name
-      k8s:
-        kind: ServiceAccount
-        namespace: "{{ k8s_namespace }}"
-        name: "deploy-account"
-      register: service_account
+    k8s:
+      kind: ServiceAccount
+      namespace: "{{ k8s_namespace }}"
+      name: "deploy-account"
+    register: service_account
 
   - set_fact:
       deploy_account_name: "{{ service_account.result.secrets.0.name }}"
