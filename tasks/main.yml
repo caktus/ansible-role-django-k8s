@@ -130,16 +130,6 @@
       fail_on_error: yes
       strict: yes
 
-- name: Create/Update secrets
-  k8s:
-    definition: "{{ lookup('template', 'set_secrets.yaml.j2') }}"
-    state: present
-    host: "{{ k8s_auth_host }}"
-    wait: yes
-    validate:
-      fail_on_error: yes
-      strict: yes
-
 # Run migrations if wanted
 - when: k8s_migrations_enabled
   vars:
