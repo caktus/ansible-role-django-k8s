@@ -87,7 +87,7 @@
         strict: yes
 
   - name: Get deploy account name
-    k8s:
+    k8s_info:
       kind: ServiceAccount
       host: "{{ k8s_auth_host }}"
       namespace: "{{ k8s_namespace }}"
