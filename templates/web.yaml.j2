@@ -5,6 +5,16 @@ Anywhere we need to inject a non-scalar value, we use to_json instead of to_yaml
 (and all JSON is valid YAML).
 #}
 {% for container in k8s_web_containers %}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "{{ container["name"] }}-secrets"
+  labels:
+    app: "{{ container["name"] }}"
+  namespace: "{{ k8s_namespace }}"
+type: Opaque
+stringData: {{ container["environment"] | to_json }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
