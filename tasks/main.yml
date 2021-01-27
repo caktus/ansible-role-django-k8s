@@ -89,6 +89,7 @@
   - name: Get deploy account name
     k8s:
       kind: ServiceAccount
+      host: "{{ k8s_auth_host }}"
       namespace: "{{ k8s_namespace }}"
       name: "deploy-account"
     register: service_account
