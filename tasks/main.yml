@@ -86,7 +86,7 @@
         fail_on_error: yes
         strict: yes
 
-  - name: Get deploy account name
+  - name: Get deploy account
     k8s_info:
       kind: ServiceAccount
       host: "{{ k8s_auth_host }}"
