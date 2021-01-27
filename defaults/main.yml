@@ -157,6 +157,8 @@ k8s_collectstatic_command:
   - -v
   - "2"
 
+k8s_batchjob_state: "{{ (k8s_migrations_enabled or k8s_collectstatic_enabled) | ternary('present', 'absent') }}"
+
 k8s_s3_cluster_name: ""  # name of EKS cluster in AWS
 k8s_s3_region: "us-east-1"
 k8s_s3_namespace: "{{ k8s_namespace }}"
