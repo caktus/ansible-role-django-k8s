@@ -1,9 +1,13 @@
 caktus.django-k8s
 =================
 
-
 Changes
 -------
+v0.0.10 on Jan 27, 2021
+~~~~~~~~~~~~~~~~~~~~~
+* Fixes migration bug (#35)
+* Fixes deploy account lookup bug (#36)
+
 v0.0.9 on Jan 4, 2021
 ~~~~~~~~~~~~~~~~~~~~~
 * Fixes elasticsearch bug that did not allow pods to return to running state after deletion.
