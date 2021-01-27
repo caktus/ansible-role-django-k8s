@@ -130,6 +130,27 @@
       fail_on_error: yes
       strict: yes
 
+- name: Create/update job secret
+  k8s:
+    api_key: "{{ k8s_auth_api_key }}"
+    host: "{{ k8s_auth_host }}"
+    ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+    state: "{{ k8s_batchjob_state }}"
+    wait: yes
+    validate:
+      fail_on_error: yes
+      strict: yes
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "{{ k8s_container_name }}-job-secrets"
+        labels:
+          app: "{{ k8s_container_name }}"
+        namespace: "{{ k8s_namespace }}"
+      type: Opaque
+      stringData: "{{ k8s_environment_variables | from_yaml }}"
+
 # Run migrations if wanted
 - when: k8s_migrations_enabled
   vars:

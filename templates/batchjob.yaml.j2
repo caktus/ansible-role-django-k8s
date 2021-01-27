@@ -16,7 +16,7 @@ spec:
           value: dns
         envFrom:
         - secretRef:
-            name: "{{ k8s_container_name }}-secrets"
+            name: "{{ k8s_container_name }}-job-secrets"
         ports:
         - containerPort: {{ k8s_container_port }}
         resources: {{ k8s_container_resources | to_json }}
