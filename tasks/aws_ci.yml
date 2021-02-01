@@ -1,0 +1,33 @@
+---
+
+#
+# Create an IAM user for CI to use when running deploys
+#
+
+- when: k8s_rollout_after_deploy and k8s_ci_create_user
+  fail:
+    msg: "Using a CI user when k8s_rollout_after_deploy will not work because this CI
+  user will not have the proper permissions to do a rollout (See README.rst note)"
+
+- name: Create CI user
+  iam:
+    name: "{{ k8s_ci_username }}"
+    state: present
+    iam_type: user
+  when: k8s_ci_create_user
+  register: ci_user
+
+- debug:
+    msg: |
+      IAM user {{ k8s_ci_username }} has been created.
+      Create an access_key in the AWS IAM console and store them in your CI's environment variables.
+  when: k8s_ci_create_user and ci_user is changed
+
+- name: Attach inline policy to user
+  iam_policy:
+    iam_type: user
+    iam_name: "{{ k8s_ci_username }}"
+    policy_name: "ECRPush"
+    state: present
+    policy_json: "{{ lookup( 'template', 'iam/ECRPush.json.j2') }}"
+  when: k8s_ci_create_user

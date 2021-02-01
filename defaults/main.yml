@@ -182,3 +182,10 @@ k8s_templates:
     state: "{{ k8s_worker_enabled | ternary('present', 'absent') }}"
   - name: workers_beat.yaml.j2
     state: "{{ (k8s_worker_enabled and k8s_worker_beat_enabled) | ternary('present', 'absent') }}"
+
+
+# Note that this is only supported on AWS clusters
+k8s_ci_create_user: "{{ k8s_ci_repository_arn | length > 0 }}"
+k8s_ci_username: ci-user
+k8s_ci_repository_arn: "" # format: arn:aws:ecr:<REGION>:<ACCOUNT_NUMBER>:repository/<REPO_NAME>
+k8s_ci_vault_password_arn: "" # format: arn:aws:secretsmanager:<REGION>:<ACCOUNT_NUMBER:secret:<SECRET_IDENTIFIER>
