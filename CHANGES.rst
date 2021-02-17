@@ -4,6 +4,15 @@ caktus.django-k8s
 Changes
 -------
 
+v1.0.0 on Feb 17, 2021
+~~~~~~~~~~~~~~~~~~~~~~
+
+**BACKWARDS INCOMPATIBLE CHANGES:**
+
+* Use updated `cert-manager` annotation key: `cert-manager.io/cluster-issuer`
+* Must update to [caktus.k8s-web-cluster](https://github.com/caktus/ansible-role-k8s-web-cluster) v1.0.0
+
+
 v0.0.11 on Feb 2, 2021
 ~~~~~~~~~~~~~~~~~~~~~~
 * Adds ``no_log`` to rollout commands to prevent logging of environment vars.
