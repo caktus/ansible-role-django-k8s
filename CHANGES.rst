@@ -4,7 +4,7 @@ caktus.django-k8s
 Changes
 -------
 
-v1.0.0 on TBD
+v1.0.0 on 2020-02-16
 ~~~~~~~~~~~~~~~~~~~~~~
 
 **BACKWARDS INCOMPATIBLE CHANGES:**
