@@ -4,6 +4,11 @@ caktus.django-k8s
 Changes
 -------
 
+v1.1.0 on Mar 4, 2021
+~~~~~~~~~~~~~~~~~~~~~~
+* Support adding a limited AWS IAM user for CI deploys
+
+
 v1.0.0 on Feb 17, 2021
 ~~~~~~~~~~~~~~~~~~~~~~
 
