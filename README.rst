@@ -182,4 +182,90 @@ A separate playbook can be used to invoke this functionality:
           name: caktus.django-k8s
           tasks_from: aws_s3
 
-Run with: ``ansible-playbook deploy-s3.yml``.
+Run with: ``ansible-playbook deploy-s3.yaml``.
+
+
+Amazon IAM: Adding a limited AWS IAM user for CI deploys
+````````````````````````````````````````````````````````
+
+In order to be able to deploy to AWS from CI systems, you'll need to be able to
+authenticate as an IAM user that has the permissions to push to the AWS ECR (Docker
+registry), and possibly need to be able to read a secret from AWS Secrets Manager (the
+``.vault_pass`` value). This playbook can create that user for you with the proper
+permissions. You can configure this with the following variables (defaults shown):
+
+.. code-block:: yaml
+
+  k8s_ci_username: myproject-ci-user
+  k8s_ci_repository_arn: "" # format: arn:aws:ecr:<REGION>:<ACCOUNT_NUMBER>:repository/<REPO_NAME>
+  k8s_ci_vault_password_arn: "" # format: arn:aws:secretsmanager:<REGION>:<ACCOUNT_NUMBER>:secret:<NAME_OF_SECRET>
+
+Only ``k8s_ci_repository_arn`` is required. The REPO_NAME portion can be found
+`here <https://console.aws.amazon.com/ecr/repositories>`_. The ``k8s_ci_vault_password_arn``
+is an optional pointer to a single secret in AWS Secrets Manager. The ARN can be found
+by going to this `link <https://console.aws.amazon.com/secretsmanager/home#/listSecrets>`_
+and then clicking on the secret you're sharing with the user. On some projects, we store
+the Ansible vault password in SecretsManager and then use an AWS CLI command to read the
+secret so other secrets in the repo can be decrypted. This allows the CI user to access
+that command.
+
+You'll need to create a separate playbook to invoke this functionality because, once
+created, we don't need to try to recreate the user on each deploy AND because the CI
+user will not have the permissions to create itself, so we don't want this playbook to
+run on CI deploys. Create a playbook that looks like this:
+
+.. code-block:: yaml
+
+  ---
+  # file: deploy-ci.yaml
+
+  - hosts: k8s
+    vars:
+      ansible_connection: local
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    tasks:
+      - name: configure CI IAM user
+        import_role:
+          name: caktus.django-k8s
+          tasks_from: aws_ci
+
+Normally we would just run this with ``ansible-playbook deploy-ci.yaml``, but
+unfortunately the Ansible IAM role still uses boto (instead of boto3) and boto is not
+compatible with using AWS profiles or AssumeRoles which we usually use to get access to
+AWS subaccounts. 
+
+If using `kubesae <https://github.com/caktus/invoke-kubesae>`_, make sure
+``c.config["aws"]["profile_name"]`` is configured in your tasks.py, and the
+following temporary credentials generation will occur automatically.
+
+Otherwise, you'll have to run this python script, which takes your
+profile (``saguaro-cluster`` in this example) and converts that into credentials that
+boto can use. Here is the python script:
+
+.. code-block:: python
+
+   import boto3
+
+   session = boto3.Session(profile_name="saguaro-cluster")
+   credentials = session.get_credentials().get_frozen_credentials()
+
+   print(f'export AWS_ACCESS_KEY_ID="{credentials.access_key}"')
+   print(f'export AWS_SECRET_ACCESS_KEY="{credentials.secret_key}"')
+   print(f'export AWS_SECURITY_TOKEN="{credentials.token}"')
+   print(f'export AWS_SESSION_TOKEN="{credentials.token}"')
+
+
+The script will print statements to your console. Copy and paste those into your console
+and then run ``ansible-playbook deploy-ci.yaml`` and it should work.
+
+After you run this role, the IAM user will be created with the proper permissions.
+You'll then need to use the AWS console to create an access key and secret key for that
+user. Take note of the ``AWS_ACCESS_KEY_ID`` and ``AWS_SECRET_ACCESS_KEY`` values.
+
+Copy those 2 variables (and ``AWS_DEFAULT_REGION``) into the CI environment variables
+console.
+
+NOTE: Be aware that you'll need to make sure that ``k8s_rollout_after_deploy`` is disabled
+(which is the default), because the rollout commands use your local ``kubectl`` which
+likely has more permissions than the IAM service account that this role depends on. See
+https://github.com/caktus/ansible-role-django-k8s/issues/25.
