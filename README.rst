@@ -232,7 +232,13 @@ run on CI deploys. Create a playbook that looks like this:
 Normally we would just run this with ``ansible-playbook deploy-ci.yaml``, but
 unfortunately the Ansible IAM role still uses boto (instead of boto3) and boto is not
 compatible with using AWS profiles or AssumeRoles which we usually use to get access to
-AWS subaccounts. So first, you'll have to run this python script, which takes your
+AWS subaccounts. 
+
+If using `kubesae <https://github.com/caktus/invoke-kubesae>`_, make sure
+``c.config["aws"]["profile_name"]`` is configured in your tasks.py, and the
+following temporary credentials generation will occur automatically.
+
+Otherwise, you'll have to run this python script, which takes your
 profile (``saguaro-cluster`` in this example) and converts that into credentials that
 boto can use. Here is the python script:
 
