@@ -50,7 +50,7 @@ k8s_domain_from_to_www_redirect: false
 k8s_namespace: "echoserver"
 
 k8s_memcached_enabled: false
-k8s_memcached_version: "1.5.19"
+k8s_memcached_version: "1.6.9"
 
 k8s_redis_enabled: false
 k8s_redis_version: "5.0.6"
