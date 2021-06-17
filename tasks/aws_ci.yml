@@ -30,4 +30,5 @@
     policy_name: "ECRPush"
     state: present
     policy_json: "{{ lookup( 'template', 'iam/ECRPush.json.j2') }}"
+    skip_duplicates: false
   when: k8s_ci_create_user
