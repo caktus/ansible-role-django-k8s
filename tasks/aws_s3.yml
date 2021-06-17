@@ -81,6 +81,7 @@
     policy_name: "EKSBucketPolicy"
     state: present
     policy_json: "{{ lookup( 'template', 's3/AssetManagementPolicy.json.j2') }}"
+    skip_duplicates: false
 
 #
 # Service Account
