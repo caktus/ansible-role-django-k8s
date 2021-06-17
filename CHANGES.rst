@@ -4,6 +4,15 @@ caktus.django-k8s
 Changes
 -------
 
+v1.2.0 on TBD
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Configure the `public access <https://docs.ansible.com/ansible/latest/collections/amazon/aws/s3_bucket_module.html#parameter-public_access>`_ block on private S3 bucket using `s3_bucket` module
+  (requires Ansible 3.0+ or v1.3.0 of the amazon.aws collection)
+* Add `skip_duplicates: false` to *Attach inline policy to user* task to fix
+  deprecation warning and `set it to the default value <https://docs.ansible.com/ansible/latest/collections/community/aws/iam_policy_module.html#parameter-skip_duplicates>`_.
+
+
 v1.1.0 on Mar 4, 2021
 ~~~~~~~~~~~~~~~~~~~~~~
 * Support adding a limited AWS IAM user for CI deploys
