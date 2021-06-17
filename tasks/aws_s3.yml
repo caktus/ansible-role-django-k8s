@@ -22,18 +22,11 @@
     versioning: yes
     region: "{{ k8s_s3_region }}"
     encryption: AES256
-
-# Not available via Ansible module as of 7/2020
-- name: "block all public access to {{ k8s_s3_private_bucket }}"
-  command:
-    argv:
-      - aws
-      - s3api
-      - put-public-access-block
-      - --bucket
-      - "{{ k8s_s3_private_bucket }}"
-      - --public-access-block-configuration
-      - BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+    public_access:
+      block_public_acls: true
+      ignore_public_acls: true
+      block_public_policy: false
+      restrict_public_buckets: false
 
 #
 # IAM OIDC identity provider and issuer

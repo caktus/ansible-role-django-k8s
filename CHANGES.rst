@@ -4,6 +4,14 @@ caktus.django-k8s
 Changes
 -------
 
+v1.2.0 on TBD
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Configure the [public access](https://docs.ansible.com/ansible/latest/collections/amazon/aws/s3_bucket_module.html#parameter-public_access) block on private S3 bucket using `s3_bucket` module
+  (requires Ansible 3.0+ or v1.3.0 of the amazon.aws collection)
+* 
+
+
 v1.1.0 on Mar 4, 2021
 ~~~~~~~~~~~~~~~~~~~~~~
 * Support adding a limited AWS IAM user for CI deploys
