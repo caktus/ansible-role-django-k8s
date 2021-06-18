@@ -166,6 +166,8 @@ k8s_s3_iam_role: "S3ServiceAccountRole-{{ k8s_s3_namespace }}"
 k8s_s3_serviceaccount: "default"
 k8s_s3_public_bucket: "{{ k8s_s3_namespace }}-assets"
 k8s_s3_private_bucket: "{{ k8s_s3_namespace }}-private-assets"
+k8s_s3_tags: {}
+k8s_s3_tags_purge: yes
 
 k8s_templates:
   - name: registry_secret.yaml.j2

@@ -10,6 +10,8 @@
     state: present
     versioning: yes
     region: "{{ k8s_s3_region }}"
+    tags: "{{ k8s_s3_tags }}"
+    purge_tags: "{{ k8s_s3_tags_purge }}"
 
 #
 # Private S3 assets bucket
@@ -21,6 +23,8 @@
     state: present
     versioning: yes
     region: "{{ k8s_s3_region }}"
+    tags: "{{ k8s_s3_tags }}"
+    purge_tags: "{{ k8s_s3_tags_purge }}"
     encryption: AES256
     public_access:
       block_public_acls: true
