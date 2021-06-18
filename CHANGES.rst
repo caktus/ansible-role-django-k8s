@@ -4,7 +4,7 @@ caktus.django-k8s
 Changes
 -------
 
-v1.2.0 on Jun 18, 2021
+v1.3.0 on Jun 18, 2021
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * Configure the `public access <https://docs.ansible.com/ansible/latest/collections/amazon/aws/s3_bucket_module.html#parameter-public_access>`_ block on private S3 bucket using `s3_bucket` module
@@ -15,6 +15,11 @@ v1.2.0 on Jun 18, 2021
     * aws_s3.yml's *Attach inline policy to user*
     * aws_ci.yml's *Attach inline policy to user*
 * Support tagging S3 buckets
+
+
+v1.2.0 on Mar 17, 2021
+~~~~~~~~~~~~~~~~~~~~~~
+* Bumps memcached version to 1.6.9
 
 
 v1.1.0 on Mar 4, 2021
