@@ -14,6 +14,7 @@ v1.2.0 on TBD
   <https://docs.ansible.com/ansible/latest/collections/community/aws/iam_policy_module.html#parameter-skip_duplicates>`_ for the following tasks:
   * aws_s3.yml's *Attach inline policy to user*
   * aws_ci.yml's *Attach inline policy to user*
+* Support tagging S3 buckets
 
 
 v1.1.0 on Mar 4, 2021
