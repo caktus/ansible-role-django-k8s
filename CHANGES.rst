@@ -4,7 +4,7 @@ caktus.django-k8s
 Changes
 -------
 
-v1.2.0 on TBD
+v1.2.0 on Jun 18, 2021
 ~~~~~~~~~~~~~~~~~~~~~~
 
 * Configure the `public access <https://docs.ansible.com/ansible/latest/collections/amazon/aws/s3_bucket_module.html#parameter-public_access>`_ block on private S3 bucket using `s3_bucket` module
