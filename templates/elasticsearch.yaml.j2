@@ -105,8 +105,10 @@ spec:
   - metadata:
       name: es-data
     spec:
+{% if k8s_storage_class_name is defined %}
+      storageClassName: "{{ k8s_storage_class_name }}"
+{% endif %}
       accessModes: ["ReadWriteOnce"]
       resources:
         requests:
           storage: {{ k8s_elasticsearch_volume_size }}
-
