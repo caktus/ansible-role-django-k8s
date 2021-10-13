@@ -141,6 +141,43 @@ Celery
   k8s_worker_resources: "{{ k8s_container_resources }}"
 
 
+RabbitMQ Support
+````````````````
+
+The RabbitMQ template included with this repo depends on the `RabbitMQ Cluster Operator for
+Kubernetes <https://www.rabbitmq.com/kubernetes/operator/operator-overview.html>`_. The
+operator is not installed with this role (since it's a cluster-wide resource). You
+can install it in your cluster by setting the ``k8s_rabbitmq_operator_version`` variable
+to the latest release (e.g., ``v1.9.0``) and including a playbook like this along side
+your other deployment scripts::
+
+  ---
+  # file: rabbitmq-operator.yaml
+
+  - hosts: k8s
+    vars:
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    tasks:
+    - name: Download cluster-operator manifest
+      ansible.builtin.get_url:
+        url: "https://github.com/rabbitmq/cluster-operator/releases/download/{{ k8s_rabbitmq_operator_version }}/cluster-operator.yml"
+        dest: /tmp/rabbitmq-cluster-operator.yml
+        mode: '0644'
+
+    - name: Apply cluster-operator manifest to the cluster
+      community.kubernetes.k8s:
+        state: present
+        src: /tmp/rabbitmq-cluster-operator.yml
+
+Once the operator is installed and running, you can create and customize a RabbitMQ cluster
+like so::
+
+  k8s_rabbitmq_enabled: true
+  k8s_rabbitmq_replicas: 3
+
+Please see ``defaults/main.yml`` for a complete list of the supported parameters.
+
+
 Amazon S3: IAM role for service accounts
 ````````````````````````````````````````
 
