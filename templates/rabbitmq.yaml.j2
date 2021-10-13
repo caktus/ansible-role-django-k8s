@@ -1,0 +1,30 @@
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: "{{ k8s_rabbitmq_cluster_name }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  # Adapted from:
+  # https://github.com/rabbitmq/cluster-operator/blob/main/docs/examples/production-ready/rabbitmq.yaml
+  replicas: {{ k8s_rabbitmq_replicas }}
+  rabbitmq:
+    additionalConfig: |
+      cluster_partition_handling = pause_minority
+      vm_memory_high_watermark_paging_ratio = 0.99
+      disk_free_limit.relative = 1.0
+      collect_statistics_interval = 10000
+  persistence:
+{% if k8s_storage_class_name is defined %}
+    storageClassName: "{{ k8s_storage_class_name }}"
+{% endif %}
+    storage: "{{ k8s_rabbitmq_volume_size }}"
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+              - "{{ k8s_rabbitmq_cluster_name }}"
+        topologyKey: kubernetes.io/hostname
