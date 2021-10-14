@@ -4,6 +4,15 @@ caktus.django-k8s
 Changes
 -------
 
+
+v1.4.0 on Oct 14, 2021
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Add support for deploying a RabbitMQ cluster. See `the README
+  <https://github.com/caktus/ansible-role-django-k8s#rabbitmq-support>`_
+  for prerequisites.
+
+
 v1.3.0 on Jun 18, 2021
 ~~~~~~~~~~~~~~~~~~~~~~
 
