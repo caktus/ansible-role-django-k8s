@@ -4,30 +4,32 @@ Anywhere we need to inject a non-scalar value, we use to_json instead of to_yaml
 2) behaves identically on Python 2 and Python 3
 (and all JSON is valid YAML).
 #}
+{% for container in k8s_worker_containers %}
+{%+ if loop.index > 0 %}---{% endif +%}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: "celery-secrets"
+  name: "{{ container["name"] }}-secrets"
   labels:
-    app: "celery"
+    app: "{{ container["name"] }}"
   namespace: "{{ k8s_namespace }}"
 type: Opaque
-stringData: {{ k8s_worker_container["environment"] | to_json }}
+stringData: {{ container["environment"] | to_json }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "celery-worker"
+  name: "{{ container["name"] }}"
   namespace: "{{ k8s_namespace }}"
 spec:
   selector:
     matchLabels:
-      app: "celery-worker"
-  replicas: {{ k8s_worker_container["replicas"] }}
+      app: "{{ container["name"] }}"
+  replicas: {{ container["replicas"] }}
   template:
     metadata:
       labels:
-        app: "celery-worker"
+        app: "{{ container["name"] }}"
     spec:
 {% if k8s_dockerconfigjson %}
       imagePullSecrets:
@@ -36,11 +38,11 @@ spec:
       imagePullSecrets: []
 {% endif %}
       containers:
-      - name: "celery-worker"
-        image: "{{ k8s_worker_container["image"] }}:{{ k8s_worker_container["tag"] }}"
-        imagePullPolicy: "{{ k8s_worker_container["image_pull_policy"] }}"
+      - name: "{{ container["name"] }}"
+        image: "{{ container["image"] }}:{{ container["tag"] }}"
+        imagePullPolicy: "{{ container["image_pull_policy"] }}"
         # command: do not override `command:` as we want to run the docker-entrypoint.sh before starting args
-        args: {{ k8s_worker_container["worker_command"] }}
+        args: {{ container["worker_command"] }}
         env:
         - name: GET_HOSTS_FROM
           value: dns
@@ -48,5 +50,6 @@ spec:
           value: "."
         envFrom:
         - secretRef:
-            name: "celery-secrets"
-        resources: {{ k8s_worker_container["resources"] | to_json }}
+            name: "{{ container["name"] }}-secrets"
+        resources: {{ container["resources"] | to_json }}
+{% endfor %}

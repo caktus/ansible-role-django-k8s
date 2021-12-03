@@ -236,6 +236,25 @@
       strict: yes
   with_items: "{{ k8s_templates }}"
 
+# FIXME: Remove in a future release
+- name: Clean up obsolete celery-secrets (replaced by celery-worker-secrets)
+  k8s:
+    api_key: "{{ k8s_auth_api_key }}"
+    ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+    host: "{{ k8s_auth_host }}"
+    definition: |
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: "celery-secrets"
+        namespace: "{{ k8s_namespace }}"
+    state: absent
+    # Ensure we see any failures in CI
+    wait: yes
+    validate:
+      fail_on_error: yes
+      strict: yes
+
 # We use `no_log: True` to avoid logging env vars in CI
 - when: k8s_rollout_after_deploy
   block:
