@@ -96,6 +96,7 @@ k8s_ingress_certificate_issuer: letsencrypt-production
 # TLS certificate as Subject Alternative Name(s)
 k8s_ingress_tls_domains_extra: []
 k8s_ingress_tls_domains: "{{ k8s_domain_names + k8s_ingress_tls_domains_extra }}"
+k8s_ingress_class: nginx
 
 k8s_container_name: web
 k8s_container_image: k8s.gcr.io/echoserver

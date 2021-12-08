@@ -76,7 +76,7 @@ metadata:
   name: "ingress"
   namespace: "{{ k8s_namespace }}"
   annotations:
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: "{{ k8s_ingress_class }}"
     nginx.org/mergeable-ingress-type: master
 {% if k8s_ingress_certificate_issuer %}
     cert-manager.io/cluster-issuer: "{{ k8s_ingress_certificate_issuer }}"
@@ -111,7 +111,7 @@ metadata:
   name: "ingress-{{ container["name"] }}"
   namespace: "{{ k8s_namespace }}"
   annotations:
-    kubernetes.io/ingress.class: nginx
+    kubernetes.io/ingress.class: "{{ k8s_ingress_class }}"
     nginx.org/mergeable-ingress-type: minion
     nginx.ingress.kubernetes.io/backend-protocol: "{{ container["protocol"] }}"
 {% if container["htpasswd"] %}
