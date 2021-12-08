@@ -129,6 +129,7 @@ k8s_web_containers:
     htpasswd: "{{ k8s_container_htpasswd }}"
 
 k8s_worker_enabled: false
+k8s_worker_name: "celery-worker"
 k8s_worker_image: "{{ k8s_container_image }}"
 k8s_worker_image_pull_policy: "{{ k8s_container_image_pull_policy }}"
 k8s_worker_image_tag: "{{ k8s_container_image_tag }}"
@@ -150,6 +151,7 @@ k8s_worker_beat_command:
   - --pidfile=/data/beat.pid
   - --schedule=/data/schedulefile.db
 k8s_worker_container:
+  name: "{{ k8s_worker_name }}"
   image: "{{ k8s_worker_image }}"
   image_pull_policy: "{{ k8s_worker_image_pull_policy }}"
   tag: "{{ k8s_worker_image_tag }}"
@@ -159,6 +161,9 @@ k8s_worker_container:
   environment: "{{ k8s_environment_variables }}"
   worker_command: "{{ k8s_worker_command }}"
   beat_command: "{{ k8s_worker_beat_command }}"
+# Override k8s_worker_containers to add additional workers (background tasks):
+k8s_worker_containers:
+  - "{{ k8s_worker_container }}"
 
 k8s_worker_beat_enabled: false
 

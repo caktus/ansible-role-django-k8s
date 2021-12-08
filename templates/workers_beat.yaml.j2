@@ -35,7 +35,7 @@ spec:
           value: .
         envFrom:
         - secretRef:
-            name: "celery-secrets"
+            name: "{{ k8s_worker_name }}-secrets"
         volumeMounts:
           - mountPath: /data
             name: beatvolume-claim
