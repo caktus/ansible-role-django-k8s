@@ -31,6 +31,10 @@ metadata:
     app: "memcached"
   namespace: "{{ k8s_namespace }}"
 spec:
+  type: "{{ k8s_memcached_service_type }}"
+{% if k8s_memcached_load_balancer_ip is defined %}
+  loadBalancerIP: "{{ k8s_memcached_load_balancer_ip }}"
+{% endif %}
   ports:
   - protocol: TCP
     # Where other things in the cluster should try to connect to our application

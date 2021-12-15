@@ -58,10 +58,18 @@ k8s_namespace: "echoserver"
 
 k8s_memcached_enabled: false
 k8s_memcached_version: "1.6.9"
+k8s_memcached_service_type: ClusterIP
+# If service_type is LoadBalancer, you can optionally assign a fixed IP for your
+# load balancer (if suppported by the provider):
+# k8s_memcached_load_balancer_ip: w.x.y.z
 
 k8s_redis_enabled: false
 k8s_redis_version: "5.0.6"
 k8s_redis_volume_size: "20Gi"
+k8s_redis_service_type: ClusterIP
+# If service_type is LoadBalancer, you can optionally assign a fixed IP for your
+# load balancer (if suppported by the provider):
+# k8s_redis_load_balancer_ip: w.x.y.z
 
 k8s_elasticsearch_enabled: false
 k8s_elasticsearch_cluster_name: "app-elasticsearch-cluster"
@@ -88,6 +96,10 @@ k8s_rabbitmq_replicas: 1
 # delete and recreate the cluster (by setting k8s_rabbitmq_enabled to false
 # temporarily) to effect a change in the volume size.
 k8s_rabbitmq_volume_size: "20Gi"
+k8s_rabbitmq_service_type: ClusterIP
+# If service_type is LoadBalancer, you can optionally assign a fixed IP for your
+# load balancer (if suppported by the provider):
+# k8s_rabbitmq_load_balancer_ip: w.x.y.z
 
 k8s_environment_variables: {}
 

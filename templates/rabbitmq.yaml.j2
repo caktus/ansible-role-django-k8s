@@ -28,3 +28,10 @@ spec:
               values:
               - "{{ k8s_rabbitmq_cluster_name }}"
         topologyKey: kubernetes.io/hostname
+  override:
+    service:
+      spec:
+        type: "{{ k8s_rabbitmq_service_type }}"
+{% if k8s_rabbitmq_load_balancer_ip is defined %}
+        loadBalancerIP: "{{ k8s_rabbitmq_load_balancer_ip }}"
+{% endif %}
