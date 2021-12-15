@@ -54,7 +54,7 @@ metadata:
   namespace: "{{ k8s_namespace }}"
 spec:
   type: "{{ k8s_redis_service_type }}"
-{% if "k8s_redis_load_balancer_ip" is defined %}
+{% if k8s_redis_load_balancer_ip is defined %}
   loadBalancerIP: "{{ k8s_redis_load_balancer_ip }}"
 {% endif %}
   ports:
