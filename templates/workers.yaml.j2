@@ -31,6 +31,18 @@ spec:
       labels:
         app: "{{ container["name"] }}"
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ container["name"] }}
+              topologyKey: kubernetes.io/hostname
 {% if k8s_dockerconfigjson %}
       imagePullSecrets:
       - name: registry-secret
