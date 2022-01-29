@@ -20,7 +20,14 @@ Development sponsored by `Caktus Consulting Group, LLC
 Requirements
 ~~~~~~~~~~~~~~~~~~~~~~
 
-* ``pip install openshift kubernetes-validate``
+* Kubernetes 1.19+ (use 1.4.x of this role for prior versions of Kubernetes)
+* The `openshift <https://github.com/openshift/openshift-restclient-python>`_ and
+  `kubernetes-validate <https://github.com/willthames/kubernetes-validate>`_
+  Python packages are required. For ``kubernetes-validate``, install the latest
+  minor release for the version of your Kubernetes cluster. For example, for
+  Kubernetes 1.23::
+
+      pip install -U openshift kubernetes-validate~=1.23.0
 
 
 Installation
