@@ -50,10 +50,10 @@ k8s_domain_from_to_www_redirect: false
 k8s_namespace: "echoserver"
 
 # Optional: Set the storageClassName used for any PersistentVolumeClaims (PVCs) used in
-# templates in this role (including Redis, RabbitMQ, Elasticsearch, and Celery Beat).
-# Warning: Changing this value after resources are created is unsupported. Instead, you will need to
-# delete and recreate any pods that depend on it (assuming that is actually safe to do). You'll get a
-# "spec is immutable after creation" error if you do attempt to change it).
+# templates in this role (including Redis, Elasticsearch, and Celery Beat). Warning:
+# Changing this value after resources are created is unsupported. Instead, you will need to
+# delete and recreate any pods that depend on it (assuming that is actually safe to do). You'll
+# get a "spec is immutable after creation" error if you do attempt to change it).
 # k8s_storage_class_name: ""
 
 k8s_memcached_enabled: false
@@ -79,27 +79,6 @@ k8s_elasticsearch_node_replicas: 3
 k8s_elasticsearch_resources:
   requests:
     memory: "1Gi"
-
-# NOTE: Using RabbitMQ relies on the RabbitMQ Cluster Kubernetes Operator.
-# Follow the instructions in the README to install and configure it before
-# attempting to create a RabbitMQ cluster. The Operator also controls the
-# version of RabbitMQ that is installed (support for customizing spec.image
-# could be considered for the future, if needed).
-k8s_rabbitmq_enabled: false
-k8s_rabbitmq_cluster_name: rabbitmq
-# Using odd numbers is "highly recommended," and reducing this number ("cluster
-# scale down") is not supported.
-# See: https://www.rabbitmq.com/kubernetes/operator/using-operator.html#update
-k8s_rabbitmq_replicas: 1
-# Important: Updating the volume size after cluster creation does not appear
-# to be supported by the Operator (as of v1.9.0 at least). You'll need to
-# delete and recreate the cluster (by setting k8s_rabbitmq_enabled to false
-# temporarily) to effect a change in the volume size.
-k8s_rabbitmq_volume_size: "20Gi"
-k8s_rabbitmq_service_type: ClusterIP
-# If service_type is LoadBalancer, you can optionally assign a fixed IP for your
-# load balancer (if suppported by the provider):
-# k8s_rabbitmq_load_balancer_ip: w.x.y.z
 
 k8s_environment_variables: {}
 
@@ -221,8 +200,6 @@ k8s_templates:
     state: "{{ k8s_elasticsearch_enabled | ternary('present', 'absent') }}"
   - name: memcached.yaml.j2
     state: "{{ k8s_memcached_enabled | ternary('present', 'absent') }}"
-  - name: rabbitmq.yaml.j2
-    state: "{{ k8s_rabbitmq_enabled | ternary('present', 'absent') }}"
   - name: web.yaml.j2
     state: present
   - name: workers.yaml.j2
