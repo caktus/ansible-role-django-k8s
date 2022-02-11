@@ -153,14 +153,14 @@ k8s_worker_celery_app: ""
 k8s_worker_command:
   - celery
   - --app={{ k8s_worker_celery_app }}
-  - worker
   - --workdir=/code
+  - worker
   - --loglevel=info
 k8s_worker_beat_command:
   - celery
   - --app={{ k8s_worker_celery_app }}
-  - beat
   - --workdir=/code
+  - beat
   - --loglevel=info
   - --pidfile=/data/beat.pid
   - --schedule=/data/schedulefile.db
