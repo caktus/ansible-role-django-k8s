@@ -5,6 +5,14 @@ Changes
 -------
 
 
+v1.5.0 on TBD
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Removed support for RabbitMQ. See `the README
+  <https://github.com/caktus/ansible-role-django-k8s#rabbitmq-support>`_
+  if you need to maintain an existing cluster.
+
+
 v1.4.0 on Oct 14, 2021
 ~~~~~~~~~~~~~~~~~~~~~~
 

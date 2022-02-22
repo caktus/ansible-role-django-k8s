@@ -151,9 +151,13 @@ Celery
 RabbitMQ Support
 ````````````````
 
-The RabbitMQ template included with this repo depends on the `RabbitMQ Cluster Operator for
-Kubernetes <https://www.rabbitmq.com/kubernetes/operator/operator-overview.html>`_. The
-operator is not installed with this role (since it's a cluster-wide resource). You
+Due to the number of related dependencies, RabbitMQ is not directly supported by this role
+and **using RabbitMQ is not recommended** unless required by your application. Version 1.4.0
+of this role did briefly support RabbitMQ. If you need to maintain existing cluster, this
+section may help.
+
+It's possible to create a cluster in the project namespace using the `RabbitMQ Cluster Operator for
+Kubernetes <https://www.rabbitmq.com/kubernetes/operator/operator-overview.html>`_. You
 can install it in your cluster by setting the ``k8s_rabbitmq_operator_version`` variable
 to the latest release (e.g., ``v1.9.0``) and including a playbook like this along side
 your other deployment scripts::
@@ -177,12 +181,95 @@ your other deployment scripts::
         src: /tmp/rabbitmq-cluster-operator.yml
 
 Once the operator is installed and running, you can create and customize a RabbitMQ cluster
-like so::
+by setting some variables::
+
+  # file: group_vars/k8s.yaml
+  #
+  # NOTE: Using RabbitMQ relies on the RabbitMQ Cluster Kubernetes Operator.
+  # See rabbitmq-operator.yaml in this repo. The Operator also controls the
+  # version of RabbitMQ that is installed (support for customizing spec.image
+  # could be considered for the future, if needed).
+  k8s_rabbitmq_enabled: true
+  # Using odd numbers is "highly recommended," and reducing this number ("cluster
+  # scale down") is not supported.
+  # See: https://www.rabbitmq.com/kubernetes/operator/using-operator.html#update
+  k8s_rabbitmq_replicas: 3
+  k8s_rabbitmq_cluster_name: rabbitmq
+  # Important: Updating the volume size after cluster creation does not appear
+  # to be supported by the Operator (as of v1.9.0 at least). You'll need to
+  # delete and recreate the cluster (by setting k8s_rabbitmq_enabled to false
+  # temporarily) to effect a change in the volume size.
+  k8s_rabbitmq_volume_size: "20Gi"
+  k8s_rabbitmq_service_type: ClusterIP
+  # If service_type is LoadBalancer, you can optionally assign a fixed IP for your
+  # load balancer (if suppported by the provider):
+  # k8s_rabbitmq_load_balancer_ip: (w.x.y.z)
 
   k8s_rabbitmq_enabled: true
   k8s_rabbitmq_replicas: 3
 
-Please see ``defaults/main.yml`` for a complete list of the supported parameters.
+Creating a template::
+
+  # file: templates/rabbitmq.yaml.j2
+
+  apiVersion: rabbitmq.com/v1beta1
+  kind: RabbitmqCluster
+  metadata:
+    name: "{{ k8s_rabbitmq_cluster_name }}"
+    namespace: "{{ k8s_namespace }}"
+  spec:
+    # Adapted from:
+    # https://github.com/rabbitmq/cluster-operator/blob/main/docs/examples/production-ready/rabbitmq.yaml
+    replicas: {{ k8s_rabbitmq_replicas }}
+    rabbitmq:
+      additionalConfig: |
+        cluster_partition_handling = pause_minority
+        vm_memory_high_watermark_paging_ratio = 0.99
+        disk_free_limit.relative = 1.0
+        collect_statistics_interval = 10000
+    persistence:
+  {% if k8s_storage_class_name is defined %}
+      storageClassName: "{{ k8s_storage_class_name }}"
+  {% endif %}
+      storage: "{{ k8s_rabbitmq_volume_size }}"
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                - "{{ k8s_rabbitmq_cluster_name }}"
+          topologyKey: kubernetes.io/hostname
+    override:
+      service:
+        spec:
+          type: "{{ k8s_rabbitmq_service_type }}"
+  {% if k8s_rabbitmq_load_balancer_ip is defined %}
+          loadBalancerIP: "{{ k8s_rabbitmq_load_balancer_ip }}"
+  {% endif %}
+
+And creating a playbook to deploy the cluster itself::
+
+  - name: RabbitMQ
+    hosts: k8s
+    tags: rabbitmq
+    tasks:
+    - name: Deploy RabbitMQ cluster
+      k8s:
+        context: "{{ k8s_context|mandatory }}"
+        kubeconfig: "{{ k8s_kubeconfig }}"
+        definition: "{{ lookup('template', item['name']) }}"
+        state: "{{ item['state'] }}"
+        # Ensure we see any failures in CI
+        wait: yes
+        validate:
+          fail_on_error: "yes"
+          strict: "yes"
+      with_items:
+        - name: rabbitmq.yaml.j2
+          state: present
 
 
 Amazon S3: IAM role for service accounts
