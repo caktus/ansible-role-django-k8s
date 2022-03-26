@@ -16,6 +16,18 @@ metadata:
 type: Opaque
 stringData: {{ container["environment"] | to_json }}
 ---
+{% for volume in container.get("data_volumes", []) %}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "{{ container["name"] }}-volume-{{ volume["name"] }}"
+  labels:
+    app: "{{ container["name"] }}"
+  namespace: "{{ k8s_namespace }}"
+type: Opaque
+stringData: {{ volume["data"] | to_json }}
+---
+{% endfor %}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -64,4 +76,16 @@ spec:
         - secretRef:
             name: "{{ container["name"] }}-secrets"
         resources: {{ container["resources"] | to_json }}
+        volumeMounts: {% if not container.get("data_volumes") %}[]{% endif +%}
+{% for volume in container.get("data_volumes", []) %}
+          - name: {{ volume["name"] }}
+            mountPath: "{{ volume["mountPath"] }}"
+            readOnly: true
+{% endfor %}
+      volumes: {% if not container.get("data_volumes") %}[]{% endif +%}
+{% for volume in container.get("data_volumes", []) %}
+        - name: {{ volume["name"] }}
+          secret:
+            secretName: "{{ container["name"] }}-volume-{{ volume["name"] }}"
+{% endfor %}
 {% endfor %}
