@@ -5,12 +5,20 @@ Changes
 -------
 
 
-v1.5.0 on TBD
-~~~~~~~~~~~~~~~~~~~~~~
+v1.5.0 on April 20th, 2022
+~~~~~~~~~~~~~~~~~~~~~
 
 * Removed support for RabbitMQ. See `the README
   <https://github.com/caktus/ansible-role-django-k8s#rabbitmq-support>`_
   if you need to maintain an existing cluster.
+* Support running multiple workers using ``k8s_worker_containers``
+* Allow override of ``kubernetes.io/ingress.class`` using ``k8s_ingress_class``
+* Allow ovverride Service ``spec.type`` and ``spec.loadBalancerIP`` for Memcache and Redis
+* Add ``podAntiAffinity`` to prefer scheduling app and worker pods on different nodes
+* Update Ingress ``apiVersion``  to ``networking.k8s.io/v1`` (Kubernetes 1.19+)
+* Fix arg order for Celery 5.x
+* Add support for mounting data volumes via Secrets within containers 
+
 
 
 v1.4.0 on Oct 14, 2021
