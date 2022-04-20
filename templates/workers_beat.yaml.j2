@@ -39,7 +39,18 @@ spec:
         volumeMounts:
           - mountPath: /data
             name: beatvolume-claim
+{% for volume in k8s_worker_container.get("data_volumes", []) %}
+          - name: {{ volume["name"] }}
+            mountPath: "{{ volume["mountPath"] }}"
+            readOnly: true
+{% endfor %}
         resources: {{ k8s_worker_container["resources"] | to_json }}
+      volumes: {% if not k8s_worker_container.get("data_volumes") %}[]{% endif +%}
+{% for volume in k8s_worker_container.get("data_volumes", []) %}
+        - name: {{ volume["name"] }}
+          secret:
+            secretName: "{{ k8s_worker_container["name"] }}-volume-{{ volume["name"] }}"
+{% endfor %}
   volumeClaimTemplates:
   - metadata:
       name: beatvolume-claim
