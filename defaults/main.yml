@@ -172,13 +172,20 @@ k8s_worker_containers:
 k8s_worker_beat_enabled: false
 
 k8s_migrations_enabled: true
-k8s_migration_command:
+k8s_migrations_timeout: 120  # seconds
+k8s_migration_command:  # DEPRECATED: keep name without trailing 's' for backwards compatibility
   - python
   - manage.py
   - migrate
   - --noinput
   - -v
   - "2"
+k8s_migrations_commend: "{{ k8s_migration_command }}"
+k8s_migrations_batchjob:
+  job_name: migrate
+  batch_command: "{{ k8s_migrations_commend }}"
+  enabled: "{{ k8s_migrations_enabled }}"
+  timeout: "{{ k8s_migrations_timeout }}"
 
 k8s_collectstatic_enabled: true
 k8s_collectstatic_timeout: 120  # seconds
@@ -189,8 +196,19 @@ k8s_collectstatic_command:
   - --noinput
   - -v
   - "2"
+k8s_collectstatic_batchjob:
+  job_name: collectstatic
+  batch_command: "{{ k8s_collectstatic_command }}"
+  enabled: "{{ k8s_collectstatic_enabled }}"
+  timeout: "{{ k8s_collectstatic_timeout }}"
 
-k8s_batchjob_state: "{{ (k8s_migrations_enabled or k8s_collectstatic_enabled) | ternary('present', 'absent') }}"
+# k8s_batchjobs are one-off jobs that are run prior to every deploy. You can keep the default
+# or override to customize the jobs needed for your project.
+k8s_batchjobs:
+  - "{{ k8s_migrations_batchjob }}"
+  - "{{ k8s_collectstatic_batchjob }}"
+# k8s_batchjob_state is a hook used to delete job secrets if no k8s_batchjobs are enabled
+k8s_batchjob_state: "{{ k8s_batchjobs | map(attribute='enabled', default=true) | select | ternary('present', 'absent') }}"
 
 k8s_s3_cluster_name: ""  # name of EKS cluster in AWS
 k8s_s3_region: "us-east-1"
