@@ -180,10 +180,10 @@ k8s_migration_command:  # DEPRECATED: keep name without trailing 's' for backwar
   - --noinput
   - -v
   - "2"
-k8s_migrations_commend: "{{ k8s_migration_command }}"
+k8s_migrations_command: "{{ k8s_migration_command }}"
 k8s_migrations_batchjob:
   job_name: migrate
-  batch_command: "{{ k8s_migrations_commend }}"
+  batch_command: "{{ k8s_migrations_command }}"
   enabled: "{{ k8s_migrations_enabled }}"
   timeout: "{{ k8s_migrations_timeout }}"
 
