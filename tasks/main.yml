@@ -158,8 +158,8 @@
       type: Opaque
       stringData: "{{ k8s_environment_variables | from_yaml }}"
 
-# Run each batch job in turn, if wanted
-- loop: "{{ k8s_batchjobs }}"
+# Run each pre-deploy batch job in turn, if wanted
+- loop: "{{ k8s_predeploy_batchjobs }}"
   loop_control:
     loop_var: batchjob
   include_tasks: batchjob_tasks.yml
@@ -214,3 +214,9 @@
     command: kubectl --namespace "{{ k8s_namespace }}" rollout restart statefulset/celery-beat
     no_log: True
     when: k8s_worker_beat_enabled
+
+# Run each post-deploy batch job in turn, if wanted
+- loop: "{{ k8s_postdeploy_batchjobs }}"
+  loop_control:
+    loop_var: batchjob
+  include_tasks: batchjob_tasks.yml

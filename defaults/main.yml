@@ -202,13 +202,15 @@ k8s_collectstatic_batchjob:
   enabled: "{{ k8s_collectstatic_enabled }}"
   timeout: "{{ k8s_collectstatic_timeout }}"
 
-# k8s_batchjobs are one-off jobs that are run prior to every deploy. You can keep the default
-# or override to customize the jobs needed for your project.
-k8s_batchjobs:
+# k8s_predeploy_batchjobs are one-off jobs that are run *before* every deploy. You can keep
+# the default or override to customize the jobs needed for your project.
+k8s_predeploy_batchjobs:
   - "{{ k8s_migrations_batchjob }}"
   - "{{ k8s_collectstatic_batchjob }}"
-# k8s_batchjob_state is a hook used to delete job secrets if no k8s_batchjobs are enabled
-k8s_batchjob_state: "{{ k8s_batchjobs | map(attribute='enabled', default=true) | select | ternary('present', 'absent') }}"
+# k8s_postdeploy_batchjobs is a hook for running batch jobs *after* every deploy.
+k8s_postdeploy_batchjobs: []
+# k8s_batchjob_state is a hook used to delete job secrets if no batch jobs are enabled
+k8s_batchjob_state: "{{ (k8s_predeploy_batchjobs + k8s_postdeploy_batchjobs) | map(attribute='enabled', default=true) | select | ternary('present', 'absent') }}"
 
 k8s_s3_cluster_name: ""  # name of EKS cluster in AWS
 k8s_s3_region: "us-east-1"
