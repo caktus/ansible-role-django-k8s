@@ -6,11 +6,11 @@ Changes
 
 v1.5.1 on May 10th, 2022
 ~~~~~~~~~~~~~~~~~~~~~
-* Rename `k8s_migration_command` to `k8s_migrations_command` (the old name will continue
+* Rename ``k8s_migration_command`` to ``k8s_migrations_command`` (the old name will continue
   working for now, but update your projects!)
-* Add `k8s_migrations_timeout` variable
+* Add ``k8s_migrations_timeout`` variable
 * Support further customizing batch jobs run before and after deploys via the new
-  `k8s_predeploy_batchjobs` and `k8s_postdeploy_batchjobs` variables
+  ``k8s_predeploy_batchjobs`` and ``k8s_postdeploy_batchjobs`` variables
 
 
 v1.5.0 on April 20th, 2022
