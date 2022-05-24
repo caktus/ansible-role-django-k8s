@@ -4,7 +4,7 @@ caktus.django-k8s
 Changes
 -------
 
-v1.5.1 on May 10th, 2022
+v1.5.1 on May 24th, 2022
 ~~~~~~~~~~~~~~~~~~~~~
 * Rename ``k8s_migration_command`` to ``k8s_migrations_command`` (the old name will continue
   working for now, but update your projects!)
