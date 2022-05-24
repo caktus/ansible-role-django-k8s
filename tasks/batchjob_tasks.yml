@@ -1,0 +1,28 @@
+- name: remove any old "{{ batchjob.job_name }}" jobs
+  k8s:
+    api_key: "{{ k8s_auth_api_key }}"
+    host: "{{ k8s_auth_host }}"
+    ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+    definition: "{{ lookup('template', 'batchjob.yaml.j2') }}"
+    state: absent
+    wait: yes
+    validate:
+      fail_on_error: yes
+      strict: yes
+  when: batchjob.enabled | default(true)
+- name: run job "{{ batchjob.job_name }}"
+  k8s:
+    api_key: "{{ k8s_auth_api_key }}"
+    host: "{{ k8s_auth_host }}"
+    ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+    definition: "{{ lookup('template', 'batchjob.yaml.j2') }}"
+    state: present
+    wait: yes
+    wait_condition:
+      type: Complete
+      status: "True"
+    wait_timeout: "{{ batchjob.timeout | default(120) }}"
+    validate:
+      fail_on_error: yes
+      strict: yes
+  when: batchjob.enabled | default(true)

@@ -4,6 +4,14 @@ caktus.django-k8s
 Changes
 -------
 
+v1.5.1 on May 24th, 2022
+~~~~~~~~~~~~~~~~~~~~~
+* Rename ``k8s_migration_command`` to ``k8s_migrations_command`` (the old name will continue
+  working for now, but update your projects!)
+* Add ``k8s_migrations_timeout`` variable
+* Support further customizing batch jobs run before and after deploys via the new
+  ``k8s_predeploy_batchjobs`` and ``k8s_postdeploy_batchjobs`` variables
+
 
 v1.5.0 on April 20th, 2022
 ~~~~~~~~~~~~~~~~~~~~~
@@ -18,7 +26,6 @@ v1.5.0 on April 20th, 2022
 * Update Ingress ``apiVersion``  to ``networking.k8s.io/v1`` (Kubernetes 1.19+)
 * Fix arg order for Celery 5.x
 * Add support for mounting data volumes via Secrets within containers 
-
 
 
 v1.4.0 on Oct 14, 2021
