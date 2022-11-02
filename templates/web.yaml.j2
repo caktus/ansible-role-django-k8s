@@ -37,6 +37,7 @@ spec:
     matchLabels:
       app: "{{ container["name"] }}"
   replicas: {{ container["replicas"] }}
+  strategy: {{ container["strategy"] | to_json }}
   template:
     metadata:
       labels:
