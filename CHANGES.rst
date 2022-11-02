@@ -4,6 +4,11 @@ caktus.django-k8s
 Changes
 -------
 
+v1.5.2 on November 2nd, 2022
+~~~~~~~~~~~~~~~~~~~~~
+* Add support for customizing Deployment strategy for web and worker processes
+
+
 v1.5.1 on May 24th, 2022
 ~~~~~~~~~~~~~~~~~~~~~
 * Rename ``k8s_migration_command`` to ``k8s_migrations_command`` (the old name will continue
