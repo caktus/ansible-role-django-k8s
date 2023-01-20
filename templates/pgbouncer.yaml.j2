@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "pgbouncer-secrets"
+  labels:
+    app: "pgbouncer"
+  namespace: "{{ k8s_namespace }}"
+type: Opaque
+{% if k8s_pgbouncer_enabled %}
+{# fail loudly if k8s_pgbouncer_environment not defined when enabled (see defaults/main.yml) #}
+stringData: {{ k8s_pgbouncer_environment | to_json }}
+{% else %}
+stringData: {{ k8s_pgbouncer_environment | default({}) | to_json }}
+{% endif %}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "pgbouncer"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  selector:
+    matchLabels:
+      app: "pgbouncer"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: "pgbouncer"
+    spec:
+      containers:
+      - name: "pgbouncer"
+        image: "{{ k8s_pgbouncer_repo }}:{{ k8s_pgbouncer_version }}"
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: GET_HOSTS_FROM
+          value: dns
+        envFrom:
+        - secretRef:
+            name: "pgbouncer-secrets"
+        ports:
+        - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "pgbouncer"
+  labels:
+    app: "pgbouncer"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  type: "{{ k8s_pgbouncer_service_type }}"
+{% if k8s_pgbouncer_load_balancer_ip is defined %}
+  loadBalancerIP: "{{ k8s_pgbouncer_load_balancer_ip }}"
+{% endif %}
+  ports:
+  - protocol: TCP
+    # Where other things in the cluster should try to connect to our application
+    port: 5432
+    # Where our application is listening:
+    targetPort: 5432
+  selector:
+    app: "pgbouncer"
