@@ -35,6 +35,8 @@ spec:
         env:
         - name: GET_HOSTS_FROM
           value: dns
+        - name: PGBOUNCER_SECRETS_HASH
+          value: "{{ k8s_pgbouncer_environment | default({}) | to_json | hash('sha256') }}"
         envFrom:
         - secretRef:
             name: "pgbouncer-secrets"
