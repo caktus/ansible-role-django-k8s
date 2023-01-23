@@ -22,12 +22,24 @@ spec:
   selector:
     matchLabels:
       app: "pgbouncer"
-  replicas: 1
+  replicas: {{ k8s_pgbouncer_replicas }}
   template:
     metadata:
       labels:
         app: "pgbouncer"
     spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - pgbouncer
+              topologyKey: kubernetes.io/hostname
       containers:
       - name: "pgbouncer"
         image: "{{ k8s_pgbouncer_repo }}:{{ k8s_pgbouncer_version }}"

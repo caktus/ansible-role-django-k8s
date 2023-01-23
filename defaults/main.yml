@@ -74,6 +74,7 @@ k8s_redis_service_type: ClusterIP
 k8s_pgbouncer_enabled: false
 k8s_pgbouncer_repo: "edoburu/pgbouncer"
 k8s_pgbouncer_version: "1.18.0"
+k8s_pgbouncer_replicas: 1
 k8s_pgbouncer_service_type: ClusterIP
 # If service_type is LoadBalancer, you can optionally assign a fixed IP for your
 # load balancer (if suppported by the provider):
