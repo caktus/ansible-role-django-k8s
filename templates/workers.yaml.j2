@@ -73,6 +73,8 @@ spec:
           value: dns
         - name: PYTHONPATH
           value: "."
+        - name: "{{ container["name"] | upper }}_SECRETS_HASH"
+          value: "{{ container["environment"] | to_json | hash("sha256") }}"
         envFrom:
         - secretRef:
             name: "{{ container["name"] }}-secrets"
