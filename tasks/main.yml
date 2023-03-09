@@ -86,22 +86,11 @@
         fail_on_error: yes
         strict: yes
 
-  - name: Get deploy account
-    k8s_info:
-      kind: ServiceAccount
-      host: "{{ k8s_auth_host }}"
-      namespace: "{{ k8s_namespace }}"
-      name: "deploy-account"
-    register: service_account
-
-  - set_fact:
-      deploy_account_name: "{{ service_account.resources.0.secrets.0.name }}"
-
   - name: Get deploy account secret (contains secret token=k8s_auth_api_key)
     k8s_info:
       kind: Secret
       namespace: "{{ k8s_namespace }}"
-      name: "{{ deploy_account_name }}"
+      name: "deploy-account-secret"
       host: "{{ k8s_auth_host }}"
     register: deploy_account_secret
 
