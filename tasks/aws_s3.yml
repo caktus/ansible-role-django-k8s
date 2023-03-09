@@ -93,7 +93,7 @@
 
 # https://docs.aws.amazon.com/eks/latest/userguide/specify-service-account-role.html
 - name: "Associate IAM role with the service account in your cluster"
-  k8s:
+  kubernetes.core.k8s:
     state: present
     definition:
       apiVersion: v1

@@ -257,7 +257,7 @@ And creating a playbook to deploy the cluster itself::
     tags: rabbitmq
     tasks:
     - name: Deploy RabbitMQ cluster
-      k8s:
+      kubernetes.core.k8s:
         context: "{{ k8s_context|mandatory }}"
         kubeconfig: "{{ k8s_kubeconfig }}"
         definition: "{{ lookup('template', item['name']) }}"
