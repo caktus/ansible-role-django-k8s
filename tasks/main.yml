@@ -65,7 +65,7 @@
 - when: not k8s_auth_api_key
   block:
   - name: Create/update namespace (needed for deploy account)
-    k8s:
+    kubernetes.core.k8s:
       definition: "{{ lookup('template', 'namespace.yaml.j2') }}"
       state: present
       host: "{{ k8s_auth_host }}"
@@ -76,7 +76,7 @@
         strict: yes
 
   - name: Create/update deploy account
-    k8s:
+    kubernetes.core.k8s:
       definition: "{{ lookup('template', 'deploy_account.yaml.j2') }}"
       state: present
       host: "{{ k8s_auth_host }}"
@@ -87,7 +87,7 @@
         strict: yes
 
   - name: Get deploy account secret (contains secret token=k8s_auth_api_key)
-    k8s_info:
+    kubernetes.core.k8s_info:
       kind: Secret
       namespace: "{{ k8s_namespace }}"
       name: "deploy-account-secret"
@@ -116,7 +116,7 @@
 # can only do this when we've been run with valid kubeconfig access.
 - when: kubeconfig_valid
   name: Update deploy account
-  k8s:
+  kubernetes.core.k8s:
     definition: "{{ lookup('template', 'deploy_account.yaml.j2') }}"
     state: present
     host: "{{ k8s_auth_host }}"
@@ -127,7 +127,7 @@
       strict: yes
 
 - name: Create/update job secret
-  k8s:
+  kubernetes.core.k8s:
     api_key: "{{ k8s_auth_api_key }}"
     host: "{{ k8s_auth_host }}"
     ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
@@ -154,7 +154,7 @@
   include_tasks: batchjob_tasks.yml
 
 - name: Create/update templates in Kubernetes
-  k8s:
+  kubernetes.core.k8s:
     api_key: "{{ k8s_auth_api_key }}"
     ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
     host: "{{ k8s_auth_host }}"
@@ -169,7 +169,7 @@
 
 # FIXME: Remove in a future release
 - name: Clean up obsolete celery-secrets (replaced by celery-worker-secrets)
-  k8s:
+  kubernetes.core.k8s:
     api_key: "{{ k8s_auth_api_key }}"
     ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
     host: "{{ k8s_auth_host }}"
