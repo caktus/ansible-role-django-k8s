@@ -1,5 +1,5 @@
 - name: remove any old "{{ batchjob.job_name }}" jobs
-  k8s:
+  kubernetes.core.k8s:
     api_key: "{{ k8s_auth_api_key }}"
     host: "{{ k8s_auth_host }}"
     ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
@@ -11,7 +11,7 @@
       strict: yes
   when: batchjob.enabled | default(true)
 - name: run job "{{ batchjob.job_name }}"
-  k8s:
+  kubernetes.core.k8s:
     api_key: "{{ k8s_auth_api_key }}"
     host: "{{ k8s_auth_host }}"
     ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
