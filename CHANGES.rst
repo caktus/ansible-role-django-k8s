@@ -4,6 +4,17 @@ caktus.django-k8s
 Changes
 -------
 
+v1.6.0 on April 25th, 2023
+~~~~~~~~~~~~~~~~~~~~~
+
+* Manually create a non-expiring ``ServiceAccount`` token ``Secret`` to support Kubernetes v1.24. Relevant `release notes <https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-1.24.md#urgent-upgrade-notes>`_:
+
+    * The ``LegacyServiceAccountTokenNoAutoGeneration`` feature gate is beta, and enabled by default. When enabled, Secret API objects containing service account tokens are no longer auto-generated for every ``ServiceAccount``. Use the `TokenRequest <https://kubernetes.io/docs/reference/kubernetes-api/authentication-resources/token-request-v1>`_ API to acquire service account tokens, or if a non-expiring token is required, create a Secret API object for the token controller to populate with a service account token by following this `guide <https://kubernetes.io/docs/concepts/configuration/secret/#service-account-token-secrets>`_. 
+
+    * Each service account API key will be regenerated and will require you to rotate the ``k8s_auth_api_key`` Ansible variable(s).
+
+* Switch to ``kubernetes.core`` for Ansible 6.x+ support and use `fully qualified collection names (FQCNs) <https://github.com/ansible-collections/overview/blob/4e7fdd2512a4ec213b1beccef3b58dfb58b0d06e/README.rst#terminology>`_ to be explicit. The ``community.kubernetes`` collection was renamed to ``kubernetes.core`` in `v2.0.0 of the kubernetes.core collection <https://github.com/ansible-collections/community.kubernetes/blob/main/CHANGELOG.rst#v2-0-0>`_. Since `Ansible v3.0.0 <https://github.com/ansible-community/ansible-build-data/blob/main/3/CHANGELOG-v3.rst#included-collections>`_, both the ``kubernetes.core`` and ``community.kubernetes`` namespaced collections were included for convenience. `Ansible v6.0.0 <https://github.com/ansible-community/ansible-build-data/blob/f3602822e899015312852bb3e2debe52df109135/6/CHANGELOG-v6.rst#L4281>`_ removed the ``community.kubernetes`` convenience package.
+
 v1.5.2 on November 2nd, 2022
 ~~~~~~~~~~~~~~~~~~~~~
 * Add support for customizing Deployment strategy for web and worker processes
