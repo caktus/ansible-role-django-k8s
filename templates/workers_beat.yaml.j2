@@ -33,6 +33,8 @@ spec:
           value: dns
         - name: PYTHONPATH
           value: .
+        - name: "{{ k8s_worker_name | upper }}_SECRETS_HASH"
+          value: "{{ k8s_worker_container["environment"] | to_json | hash("sha256") }}"
         envFrom:
         - secretRef:
             name: "{{ k8s_worker_name }}-secrets"
