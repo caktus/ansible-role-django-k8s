@@ -84,6 +84,20 @@ k8s_redis_service_type: ClusterIP
 # load balancer (if suppported by the provider):
 # k8s_redis_load_balancer_ip: w.x.y.z
 
+k8s_pgbouncer_enabled: false
+k8s_pgbouncer_repo: "edoburu/pgbouncer"
+k8s_pgbouncer_version: "1.18.0"
+k8s_pgbouncer_replicas: 1
+k8s_pgbouncer_service_type: ClusterIP
+# If service_type is LoadBalancer, you can optionally assign a fixed IP for your
+# load balancer (if suppported by the provider):
+# k8s_pgbouncer_load_balancer_ip: w.x.y.z
+# To use pgbouncer, you must define a k8s_pgbouncer_environment variable with
+# at minimum the DATABASE_URL and any other settings you wish to customize.
+# See: https://hub.docker.com/r/edoburu/pgbouncer/
+# k8s_pgbouncer_environment:
+#   DATABASE_URL: postgres://...
+
 k8s_elasticsearch_enabled: false
 k8s_elasticsearch_cluster_name: "app-elasticsearch-cluster"
 k8s_elasticsearch_version: "7.5.2"
@@ -246,6 +260,8 @@ k8s_templates:
     state: "{{ k8s_dockerconfigjson | ternary('present', 'absent') }}"
   - name: redis.yaml.j2
     state: "{{ k8s_redis_enabled | ternary('present', 'absent') }}"
+  - name: pgbouncer.yaml.j2
+    state: "{{ k8s_pgbouncer_enabled | ternary('present', 'absent') }}"
   - name: elasticsearch.yaml.j2
     state: "{{ k8s_elasticsearch_enabled | ternary('present', 'absent') }}"
   - name: memcached.yaml.j2
