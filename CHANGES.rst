@@ -3,6 +3,11 @@ caktus.django-k8s
 
 Changes
 -------
+v1.7.0 on September 27th, 2023
+~~~~~~~~~~~~~~~~~~~~~
+
+* This PR adds support for pgbouncer to help reduce Postgres connection usage and latency.
+
 
 v1.6.0 on April 25th, 2023
 ~~~~~~~~~~~~~~~~~~~~~
