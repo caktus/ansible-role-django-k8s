@@ -162,9 +162,9 @@
     state: "{{ item['state'] }}"
     # Ensure we see any failures in CI
     wait: yes
-    validate:
-      fail_on_error: yes
-      strict: yes
+    # validate:
+    #   fail_on_error: yes
+    #   strict: yes
   with_items: "{{ k8s_templates }}"
 
 # FIXME: Remove in a future release

@@ -12,6 +12,24 @@ stringData: {{ k8s_pgbouncer_environment | to_json }}
 {% else %}
 stringData: {{ k8s_pgbouncer_environment | default({}) | to_json }}
 {% endif %}
+{% if k8s_pgbouncer_selfsigned_certificate_issuer %}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "{{ k8s_pgbouncer_selfsigned_certificate_name }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  commonName: "{{ k8s_pgbouncer_selfsigned_certificate_name }}"
+  secretName: "{{ k8s_pgbouncer_selfsigned_certificate_name }}"
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: "{{ k8s_pgbouncer_selfsigned_certificate_issuer }}"
+    kind: ClusterIssuer
+    group: cert-manager.io
+{% endif %}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -52,8 +70,20 @@ spec:
         envFrom:
         - secretRef:
             name: "pgbouncer-secrets"
+{% if k8s_pgbouncer_selfsigned_certificate_issuer %}
+        volumeMounts:
+        - mountPath: "/etc/pgbouncer/ssl"
+          name: {{ k8s_pgbouncer_selfsigned_certificate_name }}
+          readOnly: true
+{% endif %}
         ports:
         - containerPort: 5432
+{% if k8s_pgbouncer_selfsigned_certificate_issuer %}
+      volumes:
+      - name: {{ k8s_pgbouncer_selfsigned_certificate_name }}
+        secret:
+          secretName: {{ k8s_pgbouncer_selfsigned_certificate_name }}
+{% endif %}
 ---
 apiVersion: v1
 kind: Service
