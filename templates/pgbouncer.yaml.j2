@@ -12,7 +12,7 @@ stringData: {{ k8s_pgbouncer_environment | to_json }}
 {% else %}
 stringData: {{ k8s_pgbouncer_environment | default({}) | to_json }}
 {% endif %}
-{% if k8s_pgbouncer_selfsigned_certificate_issuer %}
+{% if k8s_pgbouncer_selfsigned_certificate_cluster_issuer %}
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -26,7 +26,7 @@ spec:
     algorithm: ECDSA
     size: 256
   issuerRef:
-    name: "{{ k8s_pgbouncer_selfsigned_certificate_issuer }}"
+    name: "{{ k8s_pgbouncer_selfsigned_certificate_cluster_issuer }}"
     kind: ClusterIssuer
     group: cert-manager.io
 {% endif %}
@@ -70,7 +70,7 @@ spec:
         envFrom:
         - secretRef:
             name: "pgbouncer-secrets"
-{% if k8s_pgbouncer_selfsigned_certificate_issuer %}
+{% if k8s_pgbouncer_selfsigned_certificate_cluster_issuer %}
         volumeMounts:
         - mountPath: "/etc/pgbouncer/ssl"
           name: {{ k8s_pgbouncer_selfsigned_certificate_name }}
@@ -78,7 +78,7 @@ spec:
 {% endif %}
         ports:
         - containerPort: 5432
-{% if k8s_pgbouncer_selfsigned_certificate_issuer %}
+{% if k8s_pgbouncer_selfsigned_certificate_cluster_issuer %}
       volumes:
       - name: {{ k8s_pgbouncer_selfsigned_certificate_name }}
         secret:

@@ -88,7 +88,10 @@ k8s_pgbouncer_enabled: false
 k8s_pgbouncer_repo: "edoburu/pgbouncer"
 k8s_pgbouncer_version: "1.18.0"
 k8s_pgbouncer_replicas: 1
-k8s_pgbouncer_selfsigned_certificate_issuer: cluster-selfsigned-ca-issuer
+# Use a SelfSigned issuer to create a Certificate to enable TLS mode to use for
+# connections from clients (client_tls_sslmode)
+# https://cert-manager.io/docs/configuration/selfsigned/
+k8s_pgbouncer_selfsigned_certificate_cluster_issuer: ""
 k8s_pgbouncer_selfsigned_certificate_name: pgbouncer-client-tls
 k8s_pgbouncer_service_type: ClusterIP
 # If service_type is LoadBalancer, you can optionally assign a fixed IP for your
