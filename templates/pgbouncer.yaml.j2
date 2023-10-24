@@ -52,8 +52,20 @@ spec:
         envFrom:
         - secretRef:
             name: "pgbouncer-secrets"
+{% if k8s_pgbouncer_selfsigned_certificate_name %}
+        volumeMounts:
+        - mountPath: "/etc/pgbouncer/ssl"
+          name: {{ k8s_pgbouncer_selfsigned_certificate_name }}
+          readOnly: true
+{% endif %}
         ports:
         - containerPort: 5432
+{% if k8s_pgbouncer_selfsigned_certificate_name %}
+      volumes:
+      - name: {{ k8s_pgbouncer_selfsigned_certificate_name }}
+        secret:
+          secretName: {{ k8s_pgbouncer_selfsigned_certificate_name }}
+{% endif %}
 ---
 apiVersion: v1
 kind: Service

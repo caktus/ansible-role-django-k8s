@@ -3,6 +3,16 @@ caktus.django-k8s
 
 Changes
 -------
+
+v1.8.0 on October 24, 2023
+~~~~~~~~~~~~~~~~~~~~~
+
+* `k8s_pgbouncer_selfsigned_certificate_name`: add support mounting a
+  Certificate from the `k8s_na````¡mespace` to pgBouncer's `/etc/pgbouncer/ssl/`
+  directory to enable TLS mode to use for connections from clients
+  (`client_tls_sslmode`).
+
+
 v1.7.0 on September 27th, 2023
 ~~~~~~~~~~~~~~~~~~~~~
 
