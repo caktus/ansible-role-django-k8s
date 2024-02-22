@@ -6,6 +6,12 @@ metadata:
 spec:
   template:
     spec:
+{% if k8s_dockerconfigjson %}
+      imagePullSecrets:
+      - name: registry-secret
+{% else %}
+      imagePullSecrets: []
+{% endif %}
       containers:
       - name: "{{ k8s_container_name }}"
         image: "{{ k8s_container_image }}:{{ k8s_container_image_tag }}"
