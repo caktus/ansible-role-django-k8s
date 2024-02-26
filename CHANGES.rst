@@ -4,6 +4,11 @@ caktus.django-k8s
 Changes
 -------
 
+v1.9.0 on February 26, 2024
+~~~~~~~~~~~~~~~~~~~~~
+
+* Conditinally create or update registry secret on batchjobs.
+
 v1.8.0 on October 24, 2023
 ~~~~~~~~~~~~~~~~~~~~~
 
