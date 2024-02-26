@@ -126,6 +126,19 @@
       fail_on_error: yes
       strict: yes
 
+- name: Create/update registry-secret
+  kubernetes.core.k8s:
+    api_key: "{{ k8s_auth_api_key }}"
+    ca_cert: "{{ k8s_auth_ssl_ca_cert }}"
+    host: "{{ k8s_auth_host }}"
+    definition: "{{ lookup('template', 'registry_secret.yaml.j2') }}"
+    state: "{{ k8s_dockerconfigjson | ternary('present', 'absent') }}"
+    # Ensure we see any failures in CI
+    wait: yes
+    validate:
+      fail_on_error: yes
+      strict: yes
+
 - name: Create/update job secret
   kubernetes.core.k8s:
     api_key: "{{ k8s_auth_api_key }}"

@@ -260,8 +260,6 @@ k8s_s3_tags: {}
 k8s_s3_tags_purge: yes
 
 k8s_templates:
-  - name: registry_secret.yaml.j2
-    state: "{{ k8s_dockerconfigjson | ternary('present', 'absent') }}"
   - name: redis.yaml.j2
     state: "{{ k8s_redis_enabled | ternary('present', 'absent') }}"
   - name: pgbouncer.yaml.j2
