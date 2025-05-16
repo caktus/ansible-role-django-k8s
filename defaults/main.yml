@@ -70,14 +70,14 @@ k8s_namespace: "echoserver"
 # k8s_storage_class_name: ""
 
 k8s_memcached_enabled: false
-k8s_memcached_version: "1.6.9"
+k8s_memcached_version: "1.6.38"
 k8s_memcached_service_type: ClusterIP
 # If service_type is LoadBalancer, you can optionally assign a fixed IP for your
 # load balancer (if suppported by the provider):
 # k8s_memcached_load_balancer_ip: w.x.y.z
 
 k8s_redis_enabled: false
-k8s_redis_version: "5.0.6"
+k8s_redis_version: "7.4.3"
 k8s_redis_volume_size: "20Gi"
 k8s_redis_service_type: ClusterIP
 # If service_type is LoadBalancer, you can optionally assign a fixed IP for your
@@ -86,7 +86,7 @@ k8s_redis_service_type: ClusterIP
 
 k8s_pgbouncer_enabled: false
 k8s_pgbouncer_repo: "edoburu/pgbouncer"
-k8s_pgbouncer_version: "1.18.0"
+k8s_pgbouncer_version: "1.24.1"
 k8s_pgbouncer_replicas: 1
 # Mount a Certificate from the k8s_namespace to pgBouncer's /etc/pgbouncer/ssl/
 # directory to enable TLS mode to use for connections from clients
