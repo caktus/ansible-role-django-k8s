@@ -4,6 +4,8 @@ caktus.django-k8s
 Changes
 -------
 
+* Update default version memcached to 1.6.38, pgbouncer to 1.24.1, and redis to 7.4.3.
+
 v1.9.0 on February 26, 2024
 ~~~~~~~~~~~~~~~~~~~~~
 
