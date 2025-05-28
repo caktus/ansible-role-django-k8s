@@ -4,6 +4,11 @@ caktus.django-k8s
 Changes
 -------
 
+v1.10.1 on May 19, 2025
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* Fix PgBouncer Docker tag
+
 v1.10.0 on May 19, 2025
 ~~~~~~~~~~~~~~~~~~~~~~~
 
