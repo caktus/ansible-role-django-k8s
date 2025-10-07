@@ -3,6 +3,10 @@ caktus.django-k8s
 
 Changes
 -------
+v1.10.2 on October 7, 2025
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* Update memcached default version to 1.6.39
 
 v1.10.1 on May 28, 2025
 ~~~~~~~~~~~~~~~~~~~~~~~
