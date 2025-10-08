@@ -70,7 +70,7 @@ k8s_namespace: "echoserver"
 # k8s_storage_class_name: ""
 
 k8s_memcached_enabled: false
-k8s_memcached_version: "1.6.38"
+k8s_memcached_version: "1.6.39"
 k8s_memcached_service_type: ClusterIP
 # If service_type is LoadBalancer, you can optionally assign a fixed IP for your
 # load balancer (if suppported by the provider):
