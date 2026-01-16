@@ -172,7 +172,7 @@ k8s_wsgi_override:
   environment:
     USE_GUNICORN: "true"
 
-k8s_wsgi_container: "{{ k8s_wsgi_base | combine(wsgi_override, recursive=true) }}"
+k8s_wsgi_container: "{{ k8s_wsgi_base | combine(k8s_wsgi_override, recursive=true) }}"
 
 k8s_asgi_override:
   name: "{{ k8s_container_name }}-asgi"
