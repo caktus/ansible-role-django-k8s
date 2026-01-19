@@ -171,7 +171,7 @@ k8s_base_web_container:
 k8s_web_container_asgi_override:
   name: "{{ k8s_container_name }}-asgi"
   ingress_paths: "{{ k8s_asgi_container_ingress_paths }}"
-  environment: "{{ k8s_environment_variables | combine({'USE_GUNICORN': omit}) }}"
+  environment: "{{ k8s_environment_variables | combine({'USE_GUNICORN': ''}) }}"
 
 k8s_asgi_web_container: "{{ k8s_base_web_container | combine(k8s_web_container_asgi_override, recursive=true) }}"
 
