@@ -150,6 +150,7 @@ k8s_container_htpasswd: ""
 #       file_name: content
 k8s_container_data_volumes: []
 
+# When set to true, both wsgi and asgi containers for libyavotes app are deployed. When set to false, only wsgi container is deployed.
 k8s_enable_asgi: true
 
 k8s_base_web_container: 
