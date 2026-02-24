@@ -109,6 +109,9 @@ spec:
     app: "{{ container["name"] }}"
 ---
 {% endfor %}
+
+{# --- INGRESS NGINX --- #}
+{% if k8s_nginx_enable %}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -185,3 +188,95 @@ spec:
 {% endfor %}
 {% endfor %}
 {% endfor %}
+{% endif %}
+
+{# --- TRAEFIK --- #}
+{% if k8s_traefik_enable %}
+{% for container in k8s_web_containers %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: "{{ container['name'] }}-traefik-middlewares"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  chain:
+    middlewares:
+      - name: "{{ container['name'] }}-buffering"
+      - name: "{{ container['name'] }}-ratelimit"
+{% if container["htpasswd"] %}
+      - name: "{{ container['name'] }}-auth"
+{% endif %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: "{{ container['name'] }}-buffering"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  buffering:
+    maxRequestBodyBytes: 94371840 # 90MB
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: "{{ container['name'] }}-ratelimit"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  rateLimit:
+    average: {{ (k8s_ingress_rate_limit_rpm | int / 60) | int }}
+    burst: {{ k8s_ingress_rate_limit_connections }}
+
+{% if container["htpasswd"] %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: "{{ container['name'] }}-auth"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  basicAuth:
+    secret: "basic-auth-{{ container['name'] }}"
+{% endif %}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "traefik-ingress-{{ container['name'] }}"
+  namespace: "{{ k8s_namespace }}"
+  annotations:
+    kubernetes.io/ingress.class: "{{ k8s_traefik_ingress_class }}"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ k8s_namespace }}-{{ container['name'] }}-traefik-middlewares@kubernetescrd"
+{% if "/ws" in container["ingress_paths"] | join(",") %}
+    traefik.ingress.kubernetes.io/router.priority: "20"
+    traefik.ingress.kubernetes.io/router.idletimeout: "1200s"
+{% endif %}
+{% if k8s_ingress_certificate_issuer and not k8s_nginx_enable %}
+    cert-manager.io/cluster-issuer: "{{ k8s_ingress_certificate_issuer }}"
+{% endif %}
+spec:
+  tls:
+  - hosts:
+{% for domain in k8s_ingress_tls_domains %}
+    - "{{ domain }}"
+{% endfor %}
+    secretName: "{{ k8s_namespace }}-tls"
+  rules:
+{% for domain in k8s_domain_names %}
+  - host: "{{ domain }}"
+    http:
+      paths:
+{% for ingress_path in container["ingress_paths"] %}
+      - path: "{{ ingress_path }}"
+        pathType: Prefix
+        backend:
+          service:
+            name: "{{ container['name'] }}"
+            port:
+              number: {{ container['port'] }}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endif %}
