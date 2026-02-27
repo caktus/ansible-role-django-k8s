@@ -202,8 +202,8 @@ metadata:
 spec:
   chain:
     middlewares:
-      - name: "{{ container['name'] }}-buffering"
-      - name: "{{ container['name'] }}-ratelimit"
+      - name: "{{ container['name'] }}-body-limit"
+      - name: "{{ container['name'] }}-rate-limit"
 {% if container["htpasswd"] %}
       - name: "{{ container['name'] }}-auth"
 {% endif %}
@@ -211,7 +211,7 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: "{{ container['name'] }}-buffering"
+  name: "{{ container['name'] }}-body-limit"
   namespace: "{{ k8s_namespace }}"
 spec:
   buffering:
@@ -220,7 +220,7 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
-  name: "{{ container['name'] }}-ratelimit"
+  name: "{{ container['name'] }}-rate-limit"
   namespace: "{{ k8s_namespace }}"
 spec:
   rateLimit:
