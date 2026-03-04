@@ -26,6 +26,7 @@ rules:
       - batch
       - extensions
       - networking.k8s.io
+      - traefik.io
     resources:
       - configmaps
       - deployments
@@ -37,6 +38,7 @@ rules:
       - secrets
       - services
       - statefulsets
+      - middlewares
     verbs: ["*"]
 ---
 kind: RoleBinding
