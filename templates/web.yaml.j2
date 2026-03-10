@@ -193,6 +193,9 @@ spec:
 {# --- TRAEFIK --- #}
 {% if k8s_traefik_enable %}
 {% for container in k8s_web_containers %}
+
+{# 1. The chain middleware #}
+{% if (k8s_traefik_middlewares is defined and k8s_traefik_middlewares | length > 0) or container["htpasswd"] %}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
@@ -202,31 +205,39 @@ metadata:
 spec:
   chain:
     middlewares:
-      - name: "{{ container['name'] }}-body-limit"
-      - name: "{{ container['name'] }}-rate-limit"
+{% if k8s_traefik_middlewares is defined and k8s_traefik_middlewares | length > 0 %}
+{% for mw in k8s_traefik_middlewares %}
+      - name: "{{ container.name }}-{{ mw.name | lower }}"
+{% endfor %}
+{% endif %}
 {% if container["htpasswd"] %}
       - name: "{{ container['name'] }}-auth"
 {% endif %}
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: "{{ container['name'] }}-body-limit"
-  namespace: "{{ k8s_namespace }}"
-spec:
-  buffering:
-    maxRequestBodyBytes: 94371840 # 90MB
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: "{{ container['name'] }}-rate-limit"
-  namespace: "{{ k8s_namespace }}"
-spec:
-  rateLimit:
-    average: {{ (k8s_ingress_rate_limit_rpm | int / 60) | int }}
-    burst: {{ k8s_ingress_rate_limit_connections }}
+{% endif %}
 
+{# Dynamic middlewares specific to projects #}
+{% if k8s_traefik_middlewares is defined %}
+{% for mw in k8s_traefik_middlewares %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: "{{ container.name }}-{{ mw.name | lower }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  {{ mw.type }}:
+{% if mw.dataType | default('') == 'int' %}
+{% for key, value in mw.config.items() %}
+      {{ key }}: {{ value | int }}
+{% endfor %}
+{% else %}
+    {{ mw.config | to_nice_yaml(indent=2) | indent(4) }}
+{% endif %}
+{% endfor %}
+{% endif %}
+
+
+{# htpasswd auth middleware #}
 {% if container["htpasswd"] %}
 ---
 apiVersion: traefik.io/v1alpha1
@@ -238,6 +249,8 @@ spec:
   basicAuth:
     secret: "basic-auth-{{ container['name'] }}"
 {% endif %}
+
+{# Ingress #}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -248,9 +261,10 @@ metadata:
     kubernetes.io/ingress.class: "{{ k8s_traefik_ingress_class }}"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+{% if (k8s_traefik_middlewares is defined and k8s_traefik_middlewares | length > 0) or container["htpasswd"] %}
     traefik.ingress.kubernetes.io/router.middlewares: "{{ k8s_namespace }}-{{ container['name'] }}-traefik-middlewares@kubernetescrd"
+{% endif %}
 {% if "/ws" in container["ingress_paths"] | join(",") %}
-    traefik.ingress.kubernetes.io/router.priority: "20"
     traefik.ingress.kubernetes.io/router.idletimeout: "1200s"
 {% endif %}
 {% if k8s_ingress_certificate_issuer and not k8s_nginx_enable %}
