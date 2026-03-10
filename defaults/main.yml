@@ -298,3 +298,17 @@ k8s_ci_vault_password_arn: "" # format: arn:aws:secretsmanager:<REGION>:<ACCOUNT
 
 k8s_traefik_enable: false
 k8s_nginx_enable: true
+
+# Sample list of dynamic middleware list
+k8s_traefik_middlewares:
+  - name: "buffering"
+    type: "buffering"
+    dataType: "int"
+    config:
+      maxRequestBodyBytes: 94371840 # 90MB
+  # - name: "rateLimit"
+  #   type: "rateLimit"
+  #   dataType: "int"
+  #   config:
+  #     average: "{{ k8s_ingress_rate_limit_rpm }}"
+  #     burst: "{{ k8s_ingress_rate_limit_connections }}"
