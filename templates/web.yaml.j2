@@ -194,8 +194,37 @@ spec:
 {% if k8s_traefik_enable %}
 {% for container in k8s_web_containers %}
 
-{# 1. The chain middleware #}
-{% if (k8s_traefik_middlewares is defined and k8s_traefik_middlewares | length > 0) or container["htpasswd"] %}
+{# Generate Traefik supporting resources #}
+{% for ingress_resource in k8s_traefik_ingress_resources | default([]) %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: {{ ingress_resource.resourceKind }}
+metadata:
+  name: "{{ container['name'] }}-{{ ingress_resource.name | lower }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+{# If a resource has type root-spec, then all configurations are added at the top-level under the 'spec' key#}
+{% if ingress_resource.type | lower == 'root-spec' %}
+{{ ingress_resource.config | to_nice_yaml(indent=2) | indent(2, first=True) }}
+{% else %}
+  {{ ingress_resource.type }}:
+{% if ingress_resource.dataType | default('') | lower == 'int' %}
+{% for key, value in ingress_resource.config.items() %}
+    {{ key }}: {{ value | int }}
+{% endfor %}
+{% elif ingress_resource.dataType | default('') | lower == 'list' %}
+{% for key, value in ingress_resource.config.items() %}
+    {{ key }}: {{ value | to_json}}
+{% endfor %}
+{% else %}
+{{ ingress_resource.config | to_nice_yaml(indent=2) | indent(4, first=True) }}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+{# The Chain Middleware #}
+{% set middleware_list = k8s_traefik_ingress_resources | default([]) | selectattr('resourceKind', 'defined') | selectattr('resourceKind', 'match', '(?i)^middleware$') | list %}
+{% if middleware_list | length > 0 or container["htpasswd"] %}
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
@@ -205,37 +234,13 @@ metadata:
 spec:
   chain:
     middlewares:
-{% if k8s_traefik_middlewares is defined and k8s_traefik_middlewares | length > 0 %}
-{% for mw in k8s_traefik_middlewares %}
-      - name: "{{ container.name }}-{{ mw.name | lower }}"
+{% for ingress_resource in middleware_list %}
+      - name: "{{ container['name'] }}-{{ ingress_resource.name | lower }}"
 {% endfor %}
-{% endif %}
 {% if container["htpasswd"] %}
       - name: "{{ container['name'] }}-auth"
 {% endif %}
 {% endif %}
-
-{# Dynamic middlewares specific to projects #}
-{% if k8s_traefik_middlewares is defined %}
-{% for mw in k8s_traefik_middlewares %}
----
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: "{{ container.name }}-{{ mw.name | lower }}"
-  namespace: "{{ k8s_namespace }}"
-spec:
-  {{ mw.type }}:
-{% if mw.dataType | default('') == 'int' %}
-{% for key, value in mw.config.items() %}
-      {{ key }}: {{ value | int }}
-{% endfor %}
-{% else %}
-    {{ mw.config | to_nice_yaml(indent=2) | indent(4) }}
-{% endif %}
-{% endfor %}
-{% endif %}
-
 
 {# htpasswd auth middleware #}
 {% if container["htpasswd"] %}
@@ -250,7 +255,7 @@ spec:
     secret: "basic-auth-{{ container['name'] }}"
 {% endif %}
 
-{# Ingress #}
+{# Traefik Ingress #}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -261,13 +266,17 @@ metadata:
     kubernetes.io/ingress.class: "{{ k8s_traefik_ingress_class }}"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
-{% if (k8s_traefik_middlewares is defined and k8s_traefik_middlewares | length > 0) or container["htpasswd"] %}
+    {# Attach Middleware Chain #}
+    {%- if middleware_list | length > 0 or container["htpasswd"] -%}
     traefik.ingress.kubernetes.io/router.middlewares: "{{ k8s_namespace }}-{{ container['name'] }}-traefik-middlewares@kubernetescrd"
-{% endif %}
-{% if "/ws" in container["ingress_paths"] | join(",") %}
-    traefik.ingress.kubernetes.io/router.idletimeout: "1200s"
-{% endif %}
-{% if k8s_ingress_certificate_issuer and not k8s_nginx_enable %}
+    {%- endif %}
+
+    {# Attach ServersTransport #}
+    {%- for ingress_resource in k8s_traefik_ingress_resources | default([]) if ingress_resource.resourceKind | lower == 'serverstransport' -%}
+    traefik.ingress.kubernetes.io/service.serverstransport: "{{ k8s_namespace }}-{{ container['name'] }}-{{ ingress_resource.name | lower }}@kubernetescrd"
+    {%- endfor %}
+
+{% if k8s_ingress_certificate_issuer and k8s_traefik_ingress_is_default %}
     cert-manager.io/cluster-issuer: "{{ k8s_ingress_certificate_issuer }}"
 {% endif %}
 spec:
