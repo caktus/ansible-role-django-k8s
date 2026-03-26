@@ -308,12 +308,6 @@ k8s_traefik_ingress_resources: []
   #   dataType: "int"
   #   config:
   #     maxRequestBodyBytes: 94371840 # 90MB
-  # - name: "ip-allow-list"
-  #   type: "ipAllowList"
-  #   dataType: "list"
-  #   resourceKind: middleware
-  #   config:
-  #     sourceRange: "{{ k8s_whitelist_source_ranges }}"
   # - name: "server-transport"
   #   type: "root-spec"
   #   resourceKind: "ServersTransport"
