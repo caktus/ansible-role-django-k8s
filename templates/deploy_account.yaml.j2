@@ -38,8 +38,12 @@ rules:
       - secrets
       - services
       - statefulsets
+      - ingressroutes
       - middlewares
       - serverstransports
+      - tlsoptions
+      - tlsstores
+      - traefikservices
     verbs: ["*"]
 ---
 kind: RoleBinding
