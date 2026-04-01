@@ -299,6 +299,7 @@ k8s_ci_vault_password_arn: "" # format: arn:aws:secretsmanager:<REGION>:<ACCOUNT
 k8s_traefik_enable: false
 k8s_nginx_enable: true
 k8s_traefik_ingress_is_default: false
+k8s_traefik_ingress_class: traefik
 
 # Sample list of dynamic middleware list
 k8s_traefik_ingress_resources: []
