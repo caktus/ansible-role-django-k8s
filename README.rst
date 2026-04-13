@@ -400,3 +400,32 @@ NOTE: Be aware that you'll need to make sure that ``k8s_rollout_after_deploy`` i
 (which is the default), because the rollout commands use your local ``kubectl`` which
 likely has more permissions than the IAM service account that this role depends on. See
 https://github.com/caktus/ansible-role-django-k8s/issues/25.
+
+Ingress Configuration
+``````````````````````
+This role supports both Ingress-nginx and Traefik. Either controller can be enabled or disabled depending on the preference using the following varibales:
+
+* **k8s_nginx_enable**: Enables the creation of standard Ingress-nginx objects and associated annotations.
+
+* **k8s_traefik_enable**: Enables the generation of Traefik Ingress objects, Middlewares and various other CRDs if defined.
+
+Core Traefik Configuration
+````````````````````````````
+
+* **k8s_traefik_ingress_class**: The IngressClass name that Traefik monitors.
+
+* **k8s_traefik_ingress_is_default**: This configures Traefik as the primary controller when set to `true`. The role dynamically routes ACME challenge traffic depending on this configuration. If Traefik is set as default, the cert-manager solver uses the Traefik class; otherwise, it defaults to Ingress-nginx. This ensures the TLS certificates validate correctly regardless of which controller is in use.
+
+* **k8s_traefik_ingress_resources**: A list used to define custom Traefik CRDs like Middlewares or ServersTransports. The role bundles the custom resources into a Middleware Chain, for those that have `resourceKind` set to `middleware`. A comprehensive list of supported CRDs are detailed in this `official documentation <https://doc.traefik.io/traefik/v3.0/>`__.
+
+  Example of a custom resource:
+
+  .. code-block:: yaml
+
+      k8s_traefik_ingress_resources:
+        - name: "buffering"
+          type: "buffering"
+          resourceKind: "middleware"
+          dataType: "int"
+          config:
+            maxRequestBodyBytes: 94371840

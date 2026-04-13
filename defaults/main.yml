@@ -295,3 +295,26 @@ k8s_ci_create_user: "{{ k8s_ci_repository_arn | length > 0 }}"
 k8s_ci_username: ci-user
 k8s_ci_repository_arn: "" # format: arn:aws:ecr:<REGION>:<ACCOUNT_NUMBER>:repository/<REPO_NAME>
 k8s_ci_vault_password_arn: "" # format: arn:aws:secretsmanager:<REGION>:<ACCOUNT_NUMBER:secret:<SECRET_IDENTIFIER>
+
+k8s_traefik_enable: false
+k8s_nginx_enable: true
+k8s_traefik_ingress_is_default: false
+k8s_traefik_ingress_class: traefik
+
+# Sample list of dynamic middleware list
+k8s_traefik_ingress_resources: []
+  # - name: "buffering"
+  #   type: "buffering"
+  #   resourceKind: middleware
+  #   dataType: "int"
+  #   config:
+  #     maxRequestBodyBytes: 94371840 # 90MB
+  # - name: "server-transport"
+  #   type: "root-spec"
+  #   resourceKind: "ServersTransport"
+  #   config:
+  #     forwardingTimeouts:
+  #       dialTimeout: "1800s"
+  #       idleTimeout: "1800s"
+  #     # Possible to add more serverTransport configurations as defined
+  #     # https://doc.traefik.io/traefik/v3.0/routing/services/#serverstransport_1

@@ -15,6 +15,17 @@ metadata:
 type: Opaque
 stringData: {{ container["environment"] | to_json }}
 ---
+{% if container["htpasswd"] %}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: basic-auth-{{ container["name"] }}
+  namespace: "{{ k8s_namespace }}"
+type: Opaque
+data:
+  auth: {{ container["htpasswd"] | b64encode }}
+---
+{% endif %}
 {% for volume in container.get("data_volumes", []) %}
 apiVersion: v1
 kind: Secret
@@ -109,6 +120,9 @@ spec:
     app: "{{ container["name"] }}"
 ---
 {% endfor %}
+
+{# --- INGRESS NGINX --- #}
+{% if k8s_nginx_enable %}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -117,7 +131,7 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: "{{ k8s_ingress_class }}"
     nginx.org/mergeable-ingress-type: master
-{% if k8s_ingress_certificate_issuer %}
+{% if k8s_ingress_certificate_issuer and not(k8s_traefik_ingress_is_default) %}
     cert-manager.io/cluster-issuer: "{{ k8s_ingress_certificate_issuer }}"
 {% endif %}
 spec:
@@ -132,17 +146,6 @@ spec:
   - host: "{{ domain }}"
 {% endfor %}
 {% for container in k8s_web_containers %}
-{% if container["htpasswd"] %}
----
-apiVersion: v1
-data:
-  auth: {{ container["htpasswd"] | b64encode }}
-kind: Secret
-metadata:
-  name: basic-auth-{{ container["name"] }}
-  namespace: "{{ k8s_namespace }}"
-type: Opaque
-{% endif %}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -185,3 +188,118 @@ spec:
 {% endfor %}
 {% endfor %}
 {% endfor %}
+{% endif %}
+
+{# --- TRAEFIK --- #}
+{% if k8s_traefik_enable %}
+{% for container in k8s_web_containers %}
+
+{# Generate Traefik supporting resources #}
+{% for ingress_resource in k8s_traefik_ingress_resources | default([]) %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: {{ ingress_resource.resourceKind }}
+metadata:
+  name: "{{ container['name'] }}-{{ ingress_resource.name | lower }}"
+  namespace: "{{ k8s_namespace }}"
+spec:
+{# If a resource has type root-spec, then all configurations are added at the top-level under the 'spec' key#}
+{% if ingress_resource.type | lower == 'root-spec' %}
+{{ ingress_resource.config | to_nice_yaml(indent=2) | indent(2, first=True) }}
+{% else %}
+  {{ ingress_resource.type }}:
+{% if ingress_resource.dataType | default('') | lower == 'int' %}
+{% for key, value in ingress_resource.config.items() %}
+    {{ key }}: {{ value | int }}
+{% endfor %}
+{% elif ingress_resource.dataType | default('') | lower == 'list' %}
+{% for key, value in ingress_resource.config.items() %}
+    {{ key }}: {{ value | to_json}}
+{% endfor %}
+{% else %}
+{{ ingress_resource.config | to_nice_yaml(indent=2) | indent(4, first=True) }}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+{# The Chain Middleware #}
+{% set middleware_list = k8s_traefik_ingress_resources | default([]) | selectattr('resourceKind', 'defined') | selectattr('resourceKind', 'match', '(?i)^middleware$') | list %}
+{% if middleware_list | length > 0 or container["htpasswd"] %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: "{{ container['name'] }}-traefik-middlewares"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  chain:
+    middlewares:
+{% for ingress_resource in middleware_list %}
+      - name: "{{ container['name'] }}-{{ ingress_resource.name | lower }}"
+{% endfor %}
+{% if container["htpasswd"] %}
+      - name: "{{ container['name'] }}-auth"
+{% endif %}
+{% endif %}
+
+{# htpasswd auth middleware #}
+{% if container["htpasswd"] %}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: "{{ container['name'] }}-auth"
+  namespace: "{{ k8s_namespace }}"
+spec:
+  basicAuth:
+    secret: "basic-auth-{{ container['name'] }}"
+{% endif %}
+
+{# Traefik Ingress #}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: "traefik-ingress-{{ container['name'] }}"
+  namespace: "{{ k8s_namespace }}"
+  annotations:
+    kubernetes.io/ingress.class: "{{ k8s_traefik_ingress_class }}"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {# Attach Middleware Chain #}
+    {%- if middleware_list | length > 0 or container["htpasswd"] -%}
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ k8s_namespace }}-{{ container['name'] }}-traefik-middlewares@kubernetescrd"
+    {%- endif %}
+
+    {# Attach ServersTransport #}
+    {%- for ingress_resource in k8s_traefik_ingress_resources | default([]) if ingress_resource.resourceKind | lower == 'serverstransport' -%}
+    traefik.ingress.kubernetes.io/service.serverstransport: "{{ k8s_namespace }}-{{ container['name'] }}-{{ ingress_resource.name | lower }}@kubernetescrd"
+    {%- endfor %}
+
+{% if k8s_ingress_certificate_issuer and (k8s_traefik_ingress_is_default or (not (k8s_nginx_ingress_enabled | default(false)))) %}
+    cert-manager.io/cluster-issuer: "{{ k8s_ingress_certificate_issuer }}"
+{% endif %}
+spec:
+  tls:
+  - hosts:
+{% for domain in k8s_ingress_tls_domains %}
+    - "{{ domain }}"
+{% endfor %}
+    secretName: "{{ k8s_namespace }}-tls"
+  rules:
+{% for domain in k8s_domain_names %}
+  - host: "{{ domain }}"
+    http:
+      paths:
+{% for ingress_path in container["ingress_paths"] %}
+      - path: "{{ ingress_path }}"
+        pathType: "{{ k8s_container_ingress_path_type }}"
+        backend:
+          service:
+            name: "{{ container['name'] }}"
+            port:
+              number: {{ container['port'] }}
+{% endfor %}
+{% endfor %}
+{% endfor %}
+{% endif %}
