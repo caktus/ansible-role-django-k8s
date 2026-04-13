@@ -429,4 +429,3 @@ Core Traefik Configuration
           dataType: "int"
           config:
             maxRequestBodyBytes: 94371840
-
