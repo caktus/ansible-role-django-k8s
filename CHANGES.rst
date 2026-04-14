@@ -3,6 +3,16 @@ caktus.django-k8s
 
 Changes
 -------
+v1.11.1
+~~~~~~~
+
+* Update memcached default version to 1.6.41, redis to 7.4.8.
+
+v1.11.0
+~~~~~~~
+
+* trafik changes
+
 v1.10.3 on January 9, 2026
 ~~~~~~~~~~~~~~~~~~~~~~~
 
