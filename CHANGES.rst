@@ -3,15 +3,24 @@ caktus.django-k8s
 
 Changes
 -------
-v1.11.1
-~~~~~~~
+v1.12.1
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Update memcached default version to 1.6.41, redis to 7.4.8.
 
-v1.11.0
-~~~~~~~
+v1.12.0 on April 15, 2026
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* trafik changes
+Add Traefik Ingress Support
+* Traefik Ingress Support: Added full support for Traefik Ingress objects and Custom Resource Definitions (CRDs).
+* Dual-Controller Logic: The role now allows side-by-side configuration or exclusive selection of Ingress-nginx and Traefik.
+* Dynamic ACME Routing: Automatic cert-manager solver switching. If k8s_traefik_ingress_is_default is set to true, TLS challenges are automatically routed through Traefik.
+* Middleware & CRD Management: Introduced k8s_traefik_ingress_resources to define and chain Traefik Middlewares and other CRDs dynamically.
+
+v1.11.0 on January 21, 2026
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Add support for ASGI web container
 
 v1.10.3 on January 9, 2026
 ~~~~~~~~~~~~~~~~~~~~~~~
