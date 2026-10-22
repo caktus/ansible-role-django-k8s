@@ -3,6 +3,11 @@ caktus.django-k8s
 
 Changes
 -------
+v1.12.3
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Update memcached default version to 1.6.45, redis to 7.4.11.
+
 v1.12.2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
